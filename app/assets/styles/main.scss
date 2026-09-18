@@ -1,0 +1,16 @@
+@use '@fontsource/poppins/400.css' as *;
+@use '@fontsource/poppins/500.css' as *;
+@use '@fontsource/poppins/600.css' as *;
+@use '@fontsource/poppins/700.css' as *;
+@use './quasar-custom';
+
+html,
+body,
+#__nuxt {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+}
