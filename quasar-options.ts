@@ -13,15 +13,6 @@ export const quasarOptions: ModuleOptions = {
 
   iconSet: 'mdi-v7',
 
-  components: {
-    defaults: {
-      QBtn: {
-        unelevated: true,
-        noCaps: true,
-      },
-    },
-  },
-
   extras: {
     fontIcons: [
       'mdi-v7',

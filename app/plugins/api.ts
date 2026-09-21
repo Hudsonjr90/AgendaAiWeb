@@ -27,7 +27,7 @@ export default defineNuxtPlugin(() => {
         return
       }
 
-      authStore.clearSession()
+      authStore.logout()
 
       await navigateTo('/auth/login')
     },

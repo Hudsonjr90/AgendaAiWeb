@@ -1,37 +1,41 @@
 <template>
-  <q-card flat bordered class="q-pa-lg">
-    <q-card-section class="text-center">
-      <div class="text-h4 text-weight-bold text-primary">
-        AgendaAi
-      </div>
+  <q-card
+    bordered
+    class="q-pa-lg border-radius"
+    style="width: 420px; max-width: 92vw"
+  >
+    <q-card-section class="text-center q-pb-md">
+      <q-img
+        src="/logo.png"
+        alt="AgendaAi"
+        width="100%"
+        fit="contain"
+        class="q-mb-md"
+      />
 
-      <div class="text-subtitle2 text-grey-7 q-mt-sm">
-        Entre na sua conta
+      <div class="text-subtitle2 text-grey-7">
+        Acesse sua conta
       </div>
     </q-card-section>
 
-    <q-card-section>
-      <q-banner
-        v-if="errorMessage"
-        rounded
-        class="bg-red-1 text-negative q-mb-md"
+    <q-card-section class="q-pt-none">
+      <q-form
+        class="full-width"
+        @submit.prevent="handleLogin"
       >
-        <template #avatar>
-          <q-icon name="mdi-alert-circle" />
-        </template>
-
-        {{ errorMessage }}
-      </q-banner>
-
-      <q-form @submit.prevent="handleLogin">
         <q-input
           v-model="email"
           outlined
+          dense
           label="E-mail"
           type="email"
           autocomplete="email"
           class="q-mb-md"
           :disable="loading"
+          :rules="[
+            (value) => !!value || 'Informe seu e-mail.',
+            (value) => /.+@.+\..+/.test(value) || 'Informe um e-mail válido.',
+          ]"
         >
           <template #prepend>
             <q-icon name="mdi-email-outline" />
@@ -41,11 +45,18 @@
         <q-input
           v-model="password"
           outlined
+          dense
           label="Senha"
           :type="showPassword ? 'text' : 'password'"
           autocomplete="current-password"
           class="q-mb-lg"
           :disable="loading"
+          :rules="[
+            (value) => !!value || 'Informe sua senha.',
+            (value) =>
+              value.length >= 6 ||
+              'A senha deve ter pelo menos 6 caracteres.',
+          ]"
         >
           <template #prepend>
             <q-icon name="mdi-lock-outline" />
@@ -53,12 +64,25 @@
 
           <template #append>
             <q-icon
-              :name="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+              :name="showPassword ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
               class="cursor-pointer"
               @click="showPassword = !showPassword"
             />
           </template>
         </q-input>
+
+        <q-banner
+          v-if="errorMessage"
+          dense
+          rounded
+          class="bg-red-1 text-negative q-mb-md"
+        >
+          <template #avatar>
+            <q-icon name="mdi-alert-circle-outline" />
+          </template>
+
+          {{ errorMessage }}
+        </q-banner>
 
         <q-btn
           type="submit"
@@ -68,25 +92,19 @@
           unelevated
           no-caps
           class="full-width"
-          size="lg"
           :loading="loading"
         />
       </q-form>
     </q-card-section>
 
-    <q-card-section class="text-center">
-      <div class="text-body2 text-grey-7">
-        Ainda não possui uma conta?
-      </div>
-
+    <q-card-section class="text-center q-pt-md q-pb-sm">
       <q-btn
         flat
         no-caps
-        color="primary"
-        label="Criar conta"
-        icon="mdi-account-plus-outline"
+        color="secondary"
+        label="Não tem uma conta? Crie a sua"
+        icon-right="mdi-account-plus-outline"
         to="/auth/register"
-        class="q-mt-xs"
       />
     </q-card-section>
   </q-card>
@@ -99,6 +117,7 @@ definePageMeta({
   layout: 'auth',
 })
 
+const { isMobile } = useMobile()
 const router = useRouter()
 const authStore = useAuthStore()
 const api = useApi()
@@ -133,12 +152,9 @@ const handleLogin = async () => {
     await router.push('/admin/dashboard')
   } catch (error) {
     console.error(error)
-
     errorMessage.value = 'E-mail ou senha inválidos.'
   } finally {
     loading.value = false
   }
 }
-
-
 </script>

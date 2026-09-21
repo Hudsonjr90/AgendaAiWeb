@@ -30,4 +30,16 @@ export default defineNuxtConfig({
       fontIcons: ['mdi-v7'],
     },
   },
+
+  app: {
+    head: {
+      link: [
+        {
+          rel: 'icon',
+          type: 'image/png',
+          href: '/favicon.png',
+        },
+      ],
+    },
+  },
 })
