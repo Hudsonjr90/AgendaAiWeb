@@ -68,3 +68,26 @@ export function paymentStatusLabel(status: string): string {
       return status
   }
 }
+
+export function statusLabel(status: string): string {
+  switch (status) {
+    case 'ACTIVE':
+      return 'Ativo'
+    case 'INACTIVE':
+      return 'Inativo'
+    case 'SUSPENDED':
+      return 'Suspenso'
+    default:
+      return status
+  }
+}
+
+export function phoneFormat(phone: string): string {
+  if (!phone) return ''
+  const cleaned = phone.replace(/\D/g, '')
+  const match = cleaned.match(/^(\d{2})(\d{5})(\d{4})$/)
+  if (match) {
+    return `(${match[1]}) ${match[2]}-${match[3]}`
+  }
+  return phone
+}

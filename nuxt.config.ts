@@ -1,3 +1,5 @@
+import { quasarOptions } from './quasar-options'
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
 
@@ -9,27 +11,26 @@ export default defineNuxtConfig({
     port: 3005,
   },
 
-  css: ['~/assets/styles/main.scss'],
+  css: ['~/assets/styles/main.scss', 'leaflet/dist/leaflet.css'],
 
   runtimeConfig: {
     public: {
       apiBaseUrl: '',
+      cloudinaryCloudName: '',
+      cloudinaryProfessionalsUploadPreset: '',
+      cloudinaryStoresUploadPreset: '',
     },
   },
 
-  modules: [
-    'nuxt-quasar-ui',
-    '@pinia/nuxt',
-  ],
-
-  quasar: {
-    lang: 'pt-BR',
-    iconSet: 'mdi-v7',
-
-    extras: {
-      fontIcons: ['mdi-v7'],
+  vite: {
+    optimizeDeps: {
+      include: ['leaflet', '@vue/devtools-core', '@vue/devtools-kit'],
     },
   },
+
+  modules: ['nuxt-quasar-ui', '@pinia/nuxt'],
+
+  quasar: quasarOptions,
 
   app: {
     head: {

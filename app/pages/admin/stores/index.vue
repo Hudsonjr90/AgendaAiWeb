@@ -40,6 +40,17 @@
               >
                 <q-tooltip> Editar loja </q-tooltip>
               </q-btn>
+
+              <q-btn
+                flat
+                round
+                dense
+                icon="mdi-palette-outline"
+                color="primary"
+                @click="goToTheme(props.row.id)"
+              >
+                <q-tooltip> Identidade visual </q-tooltip>
+              </q-btn>
             </q-td>
           </template>
         </q-table>
@@ -56,6 +67,8 @@
 
 <script setup lang="ts">
 import type { QTableColumn } from 'quasar'
+import StoreFormDialog from '~/components/admin/stores/StoreFormDialog.vue'
+import { statusLabel, phoneFormat } from '~/utils/global'
 import type { Store } from '~/types/api'
 
 definePageMeta({
@@ -77,7 +90,13 @@ const columns: QTableColumn[] = [
   {
     name: 'address',
     label: 'Endereço',
-    field: 'address',
+    field: (row: Store) => {
+      const street = [row.street, row.number].filter(Boolean).join(', ')
+
+      const city = [row.city, row.state].filter(Boolean).join(' - ')
+
+      return [street, row.neighborhood, city].filter(Boolean).join(' • ')
+    },
     align: 'left',
   },
   {
@@ -85,12 +104,14 @@ const columns: QTableColumn[] = [
     label: 'Telefone',
     field: 'phone',
     align: 'left',
+    format: (val: string) => phoneFormat(val),
   },
   {
     name: 'status',
     label: 'Status',
     field: 'status',
     align: 'center',
+    format: (val: string) => statusLabel(val),
   },
   {
     name: 'actions',
@@ -115,6 +136,10 @@ const openEditDialog = (store: Store) => {
 
 const handleSaved = async () => {
   await fetchStores()
+}
+
+const goToTheme = (storeId: string) => {
+  return navigateTo(`/admin/stores/${storeId}/theme`)
 }
 
 onMounted(fetchStores)

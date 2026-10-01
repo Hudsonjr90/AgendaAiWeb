@@ -1,8 +1,6 @@
 <template>
   <q-page class="q-pa-lg wrapper">
-    <div class="text-h4 text-weight-bold">
-      Dashboard
-    </div>
+    <div class="text-h4 text-weight-bold">Dashboard</div>
 
     <div class="text-subtitle1 q-mt-sm">
       Olá, {{ authStore.user?.firstName ?? '' }}
@@ -11,42 +9,25 @@
 
     <!-- Loading -->
     <div v-if="loading" class="row q-col-gutter-md q-mt-lg">
-      <div
-        v-for="item in 3"
-        :key="item"
-        class="col-12 col-sm-4"
-      >
+      <div v-for="item in 3" :key="item" class="col-12 col-sm-4">
         <q-card flat bordered>
           <q-card-section>
             <q-skeleton type="text" width="50%" />
-            <q-skeleton
-              type="text"
-              class="text-h4"
-              width="30%"
-            />
+            <q-skeleton type="text" class="text-h4" width="30%" />
           </q-card-section>
         </q-card>
       </div>
     </div>
 
     <!-- Erro -->
-    <q-banner
-      v-else-if="error"
-      rounded
-      class="bg-negative text-white q-mt-lg"
-    >
+    <q-banner v-else-if="error" rounded class="bg-negative text-white q-mt-lg">
       <template #avatar>
-        <q-icon name="mdi-alert-circle-outline" />
+        <q-icon name="mdi-alert-circle-outline" class="q-mr-sm" />
+        {{ error }}
       </template>
 
-      {{ error }}
-
       <template #action>
-        <q-btn
-          flat
-          label="Tentar novamente"
-          @click="fetchDashboard"
-        />
+        <q-btn flat label="Tentar novamente" no-caps @click="fetchDashboard" />
       </template>
     </q-banner>
 
@@ -56,18 +37,12 @@
         <div class="col-12 col-sm-4">
           <q-card flat bordered class="full-height">
             <q-card-section class="row items-center no-wrap">
-              <q-avatar
-                color="primary"
-                text-color="white"
-                size="48px"
-              >
+              <q-avatar color="primary" text-color="white" size="48px">
                 <q-icon name="mdi-calendar-check-outline" />
               </q-avatar>
 
               <div class="q-ml-md">
-                <div class="text-body2 text-grey-7">
-                  Agendamentos hoje
-                </div>
+                <div class="text-body2 text-grey-7">Agendamentos hoje</div>
 
                 <div class="text-h4 text-weight-bold">
                   {{ dashboard?.summary.appointmentsToday ?? 0 }}
@@ -80,18 +55,12 @@
         <div class="col-12 col-sm-4">
           <q-card flat bordered class="full-height">
             <q-card-section class="row items-center no-wrap">
-              <q-avatar
-                color="info"
-                text-color="white"
-                size="48px"
-              >
+              <q-avatar color="info" text-color="white" size="48px">
                 <q-icon name="mdi-account-group-outline" />
               </q-avatar>
 
               <div class="q-ml-md">
-                <div class="text-body2 text-grey-7">
-                  Clientes
-                </div>
+                <div class="text-body2 text-grey-7">Clientes</div>
 
                 <div class="text-h4 text-weight-bold">
                   {{ dashboard?.summary.customers ?? 0 }}
@@ -104,18 +73,12 @@
         <div class="col-12 col-sm-4">
           <q-card flat bordered class="full-height">
             <q-card-section class="row items-center no-wrap">
-              <q-avatar
-                color="secondary"
-                text-color="white"
-                size="48px"
-              >
+              <q-avatar color="secondary" text-color="white" size="48px">
                 <q-icon name="mdi-account-tie-outline" />
               </q-avatar>
 
               <div class="q-ml-md">
-                <div class="text-body2 text-grey-7">
-                  Profissionais
-                </div>
+                <div class="text-body2 text-grey-7">Profissionais</div>
 
                 <div class="text-h4 text-weight-bold">
                   {{ dashboard?.summary.professionals ?? 0 }}
@@ -144,9 +107,7 @@
         <q-card-section>
           <div class="row items-center justify-between">
             <div>
-              <div class="text-h6">
-                Agendamentos de hoje
-              </div>
+              <div class="text-h6">Agendamentos de hoje</div>
 
               <div class="text-body2 text-grey-7">
                 Compromissos programados para hoje
@@ -160,9 +121,7 @@
               :loading="loading"
               @click="fetchDashboard"
             >
-              <q-tooltip>
-                Atualizar
-              </q-tooltip>
+              <q-tooltip> Atualizar </q-tooltip>
             </q-btn>
           </div>
         </q-card-section>
@@ -180,9 +139,7 @@
             color="grey-5"
           />
 
-          <div class="text-h6 q-mt-md">
-            Nenhum agendamento para hoje
-          </div>
+          <div class="text-h6 q-mt-md">Nenhum agendamento para hoje</div>
 
           <div class="text-body2 text-grey-7 q-mt-xs">
             Os agendamentos realizados aparecerão aqui.
@@ -215,13 +172,12 @@
 
             <q-item-section side>
               <div class="text-weight-medium">
-                {{ new Date(appointment.startsAt).toLocaleTimeString(
-                  'pt-BR',
-                  {
+                {{
+                  new Date(appointment.startsAt).toLocaleTimeString('pt-BR', {
                     hour: '2-digit',
                     minute: '2-digit',
-                  },
-                ) }}
+                  })
+                }}
               </div>
 
               <div class="text-caption text-grey-7">
@@ -246,12 +202,7 @@ definePageMeta({
 
 const authStore = useAuthStore()
 
-const {
-  dashboard,
-  loading,
-  error,
-  fetchDashboard,
-} = useDashboard()
+const { dashboard, loading, error, fetchDashboard } = useDashboard()
 
 onMounted(fetchDashboard)
 </script>

@@ -5,20 +5,22 @@ export interface CreateStorePayload {
   slug: string
   description?: string
   phone?: string
-  addressLine1?: string
-  addressLine2?: string
-  neighborhood?: string
-  city?: string
-  state?: string
-  postalCode?: string
-  country?: string
+  street: string
+  number: string
+  complement?: string
+  neighborhood: string
+  city: string
+  state: string
+  postalCode: string
+  country: string
+  latitude?: number | null
+  longitude?: number | null
 }
 
 export type UpdateStorePayload = Partial<CreateStorePayload>
 
 export const useStores = () => {
   const api = useApi()
-
   const stores = ref<Store[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)

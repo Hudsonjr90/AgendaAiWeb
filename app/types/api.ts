@@ -11,11 +11,7 @@ export interface LoginOrganization {
   slug: string
 }
 
-export type OrganizationRole =
-  | 'OWNER'
-  | 'ADMIN'
-  | 'MANAGER'
-  | 'STAFF'
+export type OrganizationRole = 'OWNER' | 'ADMIN' | 'MANAGER' | 'STAFF'
 
 export interface LoginResponse {
   accessToken: string
@@ -77,14 +73,18 @@ export interface Store {
   slug: string
   description: string | null
   phone: string | null
-  addressLine1: string | null
-  addressLine2: string | null
+  street: string | null
+  number: string | null
+  complement: string | null
   neighborhood: string | null
   city: string | null
   state: string | null
   postalCode: string | null
   country: string | null
+  latitude: number | null
+  longitude: number | null
   status: 'ACTIVE' | 'INACTIVE'
+
   createdAt: string
   updatedAt: string
 }
@@ -96,11 +96,13 @@ export interface RegisterResponse {
     lastName: string
     email: string
   }
+
   organization: {
     id: string
     name: string
     slug: string
   }
+
   role: string
 }
 
@@ -109,6 +111,21 @@ export interface Organization {
   name: string
   slug: string
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Professional {
+  id: string
+  organizationId: string
+  storeId: string
+  firstName: string | null
+  lastName: string | null
+  email: string | null
+  phone: string | null
+  description: string | null
+  avatarUrl: string | null
+  status: 'ACTIVE' | 'INACTIVE'
   createdAt: string
   updatedAt: string
 }
