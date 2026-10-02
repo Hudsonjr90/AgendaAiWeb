@@ -15,8 +15,6 @@
 
         <q-space />
 
-        <q-btn flat round icon="mdi-bell-outline" aria-label="Notificações" />
-
         <q-btn
           v-if="isMobile"
           flat

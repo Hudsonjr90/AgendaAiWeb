@@ -2,28 +2,18 @@
   <q-page class="q-pa-lg">
     <div class="wrapper">
       <div class="q-mb-lg">
-        <div class="text-h4 text-weight-bold">
-          Minha conta
-        </div>
+        <div class="text-h4 text-weight-bold">Minha conta</div>
 
         <div class="text-subtitle1 text-grey-7 q-mt-sm">
           Gerencie seus dados pessoais e informações de acesso.
         </div>
       </div>
 
-      <q-card
-        bordered
-        flat
-        class="border-radius"
-      >
+      <q-card bordered flat class="border-radius">
         <q-card-section>
           <div class="row items-center q-col-gutter-md">
             <div class="col-auto">
-              <q-avatar
-                color="primary"
-                text-color="white"
-                size="72px"
-              >
+              <q-avatar color="primary" text-color="white" size="72px">
                 {{ initials }}
               </q-avatar>
             </div>
@@ -61,10 +51,7 @@
             Dados pessoais
           </div>
 
-          <q-form
-            class="row q-col-gutter-md"
-            @submit.prevent="handleSave"
-          >
+          <q-form class="row q-col-gutter-md" @submit.prevent="handleSave">
             <div class="col-12 col-md-6">
               <q-input
                 v-model="fullNameField"
@@ -75,9 +62,7 @@
                 :readonly="!editing"
                 :disable="loading"
                 :rules="[
-                  (value) =>
-                    !!value?.trim() ||
-                    'Informe seu nome completo.',
+                  (value) => !!value?.trim() || 'Informe seu nome completo.',
                   (value) =>
                     value.trim().split(/\s+/).length >= 2 ||
                     'Informe nome e sobrenome.',
@@ -96,7 +81,7 @@
                 dense
                 label="E-mail"
                 type="email"
-                readonly
+                :readonly="!editing"
               >
                 <template #prepend>
                   <q-icon name="mdi-email-outline" />
@@ -104,15 +89,38 @@
               </q-input>
             </div>
 
-            <div
-              v-if="errorMessage"
-              class="col-12"
-            >
-              <q-banner
+            <div class="col-12 col-md-6">
+              <q-input
+                :model-value="user?.cpf ?? ''"
+                outlined
                 dense
-                rounded
-                class="bg-red-1 text-negative"
+                label="CPF"
+                autocomplete="cpf"
+                :readonly="!editing"
               >
+                <template #prepend>
+                  <q-icon name="mdi-account-badge-outline" />
+                </template>
+              </q-input>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <q-input
+                :model-value="user?.phone ?? ''"
+                outlined
+                dense
+                label="Telefone"
+                autocomplete="tel"
+                :readonly="!editing"
+              >
+                <template #prepend>
+                  <q-icon name="mdi-phone-outline" />
+                </template>
+              </q-input>
+            </div>
+
+            <div v-if="errorMessage" class="col-12">
+              <q-banner dense rounded class="bg-red-1 text-negative">
                 <template #avatar>
                   <q-icon name="mdi-alert-circle-outline" />
                 </template>
@@ -121,15 +129,8 @@
               </q-banner>
             </div>
 
-            <div
-              v-if="successMessage"
-              class="col-12"
-            >
-              <q-banner
-                dense
-                rounded
-                class="bg-green-1 text-positive"
-              >
+            <div v-if="successMessage" class="col-12">
+              <q-banner dense rounded class="bg-green-1 text-positive">
                 <template #avatar>
                   <q-icon name="mdi-check-circle-outline" />
                 </template>
@@ -138,10 +139,7 @@
               </q-banner>
             </div>
 
-            <div
-              v-if="editing"
-              class="col-12 row q-gutter-sm"
-            >
+            <div v-if="editing" class="col-12 row q-gutter-sm">
               <q-btn
                 type="submit"
                 color="primary"
@@ -191,11 +189,15 @@ const successMessage = ref('')
 const form = reactive({
   firstName: '',
   lastName: '',
+  phone: '',
+  cpf: '',
 })
 
 const originalForm = reactive({
   firstName: '',
   lastName: '',
+  phone: '',
+  cpf: '',
 })
 
 const fullName = computed(() => {
@@ -228,14 +230,17 @@ const fetchUser = async () => {
 
     form.firstName = response.firstName
     form.lastName = response.lastName
+    form.phone = response.phone
+    form.cpf = response.cpf
 
     originalForm.firstName = response.firstName
     originalForm.lastName = response.lastName
+    originalForm.phone = response.phone
+    originalForm.cpf = response.cpf
   } catch (error) {
     console.error(error)
 
-    errorMessage.value =
-      'Não foi possível carregar seus dados.'
+    errorMessage.value = 'Não foi possível carregar seus dados.'
   } finally {
     loading.value = false
   }
@@ -247,6 +252,8 @@ const startEditing = () => {
 
   originalForm.firstName = form.firstName
   originalForm.lastName = form.lastName
+  originalForm.phone = form.phone
+  originalForm.cpf = form.cpf
 
   editing.value = true
 }
@@ -254,6 +261,8 @@ const startEditing = () => {
 const cancelEditing = () => {
   form.firstName = originalForm.firstName
   form.lastName = originalForm.lastName
+  form.phone = originalForm.phone
+  form.cpf = originalForm.cpf
 
   errorMessage.value = ''
   editing.value = false
@@ -273,6 +282,8 @@ const handleSave = async () => {
 
   form.firstName = parts.shift() ?? ''
   form.lastName = parts.join(' ')
+  form.phone = form.phone.trim()
+  form.cpf = form.cpf.trim()
 
   loading.value = true
 
@@ -282,6 +293,8 @@ const handleSave = async () => {
       body: {
         firstName: form.firstName,
         lastName: form.lastName,
+        phone: form.phone,
+        cpf: form.cpf,
       },
     })
 
@@ -289,9 +302,13 @@ const handleSave = async () => {
 
     form.firstName = response.firstName
     form.lastName = response.lastName
+    form.phone = response.phone
+    form.cpf = response.cpf
 
     originalForm.firstName = response.firstName
     originalForm.lastName = response.lastName
+    originalForm.phone = response.phone
+    originalForm.cpf = response.cpf
 
     authStore.user = {
       ...authStore.user,
@@ -300,13 +317,11 @@ const handleSave = async () => {
 
     editing.value = false
 
-    successMessage.value =
-      'Seus dados foram atualizados com sucesso.'
+    successMessage.value = 'Seus dados foram atualizados com sucesso.'
   } catch (error) {
     console.error(error)
 
-    errorMessage.value =
-      'Não foi possível atualizar seus dados.'
+    errorMessage.value = 'Não foi possível atualizar seus dados.'
   } finally {
     loading.value = false
   }

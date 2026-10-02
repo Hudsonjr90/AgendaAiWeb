@@ -89,7 +89,7 @@
         </div>
       </div>
 
-      <!-- Organização -->
+      <!-- Organização 
       <q-card flat bordered class="q-mt-lg">
         <q-card-section>
           <div class="text-h6">
@@ -100,7 +100,7 @@
             Perfil: {{ roleLabel(authStore.role) }}
           </div>
         </q-card-section>
-      </q-card>
+      </q-card> -->
 
       <!-- Agendamentos -->
       <q-card flat bordered class="q-mt-lg">
@@ -108,10 +108,6 @@
           <div class="row items-center justify-between">
             <div>
               <div class="text-h6">Agendamentos de hoje</div>
-
-              <div class="text-body2 text-grey-7">
-                Compromissos programados para hoje
-              </div>
             </div>
 
             <q-btn
@@ -183,6 +179,9 @@
               <div class="text-caption text-grey-7">
                 {{ appointment.store.name }}
               </div>
+              <q-badge class="q-mt-xs q-ml-sm q-px-sm q-py-xs">
+                {{ appointmentStatusLabel(appointment.status) }}
+              </q-badge>
             </q-item-section>
           </q-item>
         </q-list>

@@ -1,25 +1,19 @@
-
 <template>
   <q-layout view="lHh Lpr lFf" :style="themeStyles">
     <q-header bordered class="bg-white text-dark">
-      <q-toolbar class="q-px-md q-px-lg-xl wrapper" style="min-height: 76px;">
+      <q-toolbar class="q-px-md q-px-lg-xl wrapper" style="min-height: 76px">
         <a
           href="#inicio"
-          class="row items-center no-wrap q-gutter-sm text-dark"
-          style="text-decoration: none;"
+          class="row items-center no-wrap text-dark"
+          style="text-decoration: none"
           aria-label="Página inicial da loja"
         >
-          <q-avatar
+          <q-img
             v-if="storeHeader.logoUrl"
-            rounded
-            size="88px"
-          >
-            <q-img
-              :src="storeHeader.logoUrl"
-              :alt="`Logo ${storeHeader.name}`"
-              fit="contain"
-            />
-          </q-avatar>
+            :src="storeHeader.logoUrl"
+            :alt="`Logo ${storeHeader.name}`"
+            fit="contain"
+          />
 
           <q-avatar
             v-else
@@ -31,7 +25,7 @@
             <q-icon name="mdi-storefront-outline" size="26px" />
           </q-avatar>
 
-          <span class="text-subtitle1 text-weight-bold ellipsis">
+          <span class="text-subtitle2 text-weight-bold q-ml-sm">
             {{ storeHeader.name || 'AgendaAi' }}
           </span>
         </a>
@@ -85,11 +79,7 @@
     >
       <div class="row items-center justify-between q-pa-md">
         <div class="row items-center no-wrap q-gutter-sm">
-          <q-avatar
-            v-if="storeHeader.logoUrl"
-            rounded
-            size="40px"
-          >
+          <q-avatar v-if="storeHeader.logoUrl" rounded size="68px">
             <q-img
               :src="storeHeader.logoUrl"
               :alt="`Logo ${storeHeader.name}`"
@@ -100,7 +90,7 @@
           <q-avatar
             v-else
             rounded
-            size="40px"
+            size="68px"
             color="primary"
             text-color="white"
           >
@@ -111,15 +101,6 @@
             {{ storeHeader.name || 'AgendaAi' }}
           </div>
         </div>
-
-        <q-btn
-          flat
-          round
-          dense
-          icon="mdi-close"
-          aria-label="Fechar menu"
-          @click="mobileMenuOpen = false"
-        />
       </div>
 
       <q-separator />
@@ -139,12 +120,7 @@
 
           <q-item-section>
             <q-item-label>{{ item.label }}</q-item-label>
-            <q-item-label
-              v-if="item.disabled"
-              caption
-            >
-              Em breve
-            </q-item-label>
+            <q-item-label v-if="item.disabled" caption> Em breve </q-item-label>
           </q-item-section>
         </q-item>
       </q-list>
@@ -191,20 +167,13 @@ const defaultHeader: PublicStoreHeader = {
   accentColor: '#FF4081',
 }
 
-const storeHeader = useState<PublicStoreHeader>(
-  'public-store-header',
-  () => ({ ...defaultHeader }),
-)
+const storeHeader = useState<PublicStoreHeader>('public-store-header', () => ({
+  ...defaultHeader,
+}))
 
 const mobileMenuOpen = ref(false)
 
 const navigation = [
-  {
-    label: 'Início',
-    href: '#inicio',
-    icon: 'mdi-home-outline',
-    disabled: false,
-  },
   {
     label: 'Serviços',
     href: '#servicos',
