@@ -1,7 +1,7 @@
 import type {
   LoginOrganization,
   LoginResponse,
-  LoginUser,
+  User,
   OrganizationRole,
 } from '~/types/api'
 
@@ -18,7 +18,7 @@ export const useAuthStore = defineStore('auth', () => {
     secure: import.meta.env.PROD,
   })
 
-  const user = useCookie<LoginUser | null>('agendaai_user', {
+  const user = useCookie<User | null>('agendaai_user', {
     default: () => null,
     sameSite: 'lax',
     secure: import.meta.env.PROD,
@@ -57,6 +57,10 @@ export const useAuthStore = defineStore('auth', () => {
     role.value = null
   }
 
+  const logout = () => {
+    clearSession()
+  }
+
   return {
     accessToken,
     tokenType,
@@ -66,5 +70,6 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     setSession,
     clearSession,
+    logout,
   }
 })

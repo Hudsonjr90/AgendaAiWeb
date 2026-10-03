@@ -1,7 +1,10 @@
-export interface LoginUser {
+export interface User {
   id: string
-  name: string
+  firstName: string
+  lastName: string
   email: string
+  phone: string 
+  cpf: string 
 }
 
 export interface LoginOrganization {
@@ -10,16 +13,121 @@ export interface LoginOrganization {
   slug: string
 }
 
-export type OrganizationRole =
-  | 'OWNER'
-  | 'ADMIN'
-  | 'MANAGER'
-  | 'STAFF'
+export type OrganizationRole = 'OWNER' | 'ADMIN' | 'MANAGER' | 'STAFF'
 
 export interface LoginResponse {
   accessToken: string
   tokenType: string
-  user: LoginUser
+  user: User
   organization: LoginOrganization
   role: OrganizationRole
+}
+
+export interface DashboardSummary {
+  appointmentsToday: number
+  customers: number
+  professionals: number
+}
+
+export interface DashboardCustomer {
+  id: string
+  name: string
+}
+
+export interface DashboardProfessional {
+  id: string
+  name: string
+}
+
+export interface DashboardService {
+  id: string
+  name: string
+  durationMinutes: number
+  priceCents: number
+}
+
+export interface DashboardStore {
+  id: string
+  name: string
+}
+
+export interface DashboardAppointment {
+  id: string
+  startsAt: string
+  endsAt: string
+  status: string
+  paymentStatus: string
+  customer: DashboardCustomer
+  professional: DashboardProfessional
+  service: DashboardService
+  store: DashboardStore
+}
+
+export interface DashboardResponse {
+  summary: DashboardSummary
+  todayAppointments: DashboardAppointment[]
+}
+
+export interface Store {
+  id: string
+  organizationId: string
+  name: string
+  slug: string
+  description: string | null
+  phone: string | null
+  street: string | null
+  number: string | null
+  complement: string | null
+  neighborhood: string | null
+  city: string | null
+  state: string | null
+  postalCode: string | null
+  country: string | null
+  latitude: number | null
+  longitude: number | null
+  status: 'ACTIVE' | 'INACTIVE'
+
+  createdAt: string
+  updatedAt: string
+}
+
+export interface RegisterResponse {
+  user: {
+    id: string
+    firstName: string
+    lastName: string
+    email: string
+  }
+
+  organization: {
+    id: string
+    name: string
+    slug: string
+  }
+
+  role: string
+}
+
+export interface Organization {
+  id: string
+  name: string
+  slug: string
+  status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Professional {
+  id: string
+  organizationId: string
+  storeId: string
+  firstName: string | null
+  lastName: string | null
+  email: string | null
+  phone: string | null
+  description: string | null
+  avatarUrl: string | null
+  status: 'ACTIVE' | 'INACTIVE'
+  createdAt: string
+  updatedAt: string
 }

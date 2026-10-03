@@ -3,6 +3,8 @@ import type { ModuleOptions } from 'nuxt-quasar-ui'
 export const quasarOptions: ModuleOptions = {
   sassVariables: '@/assets/styles/quasar-variable.scss',
 
+  lang: 'pt-BR',
+
   plugins: [
     'Dialog',
     'Loading',
@@ -13,15 +15,6 @@ export const quasarOptions: ModuleOptions = {
 
   iconSet: 'mdi-v7',
 
-  components: {
-    defaults: {
-      QBtn: {
-        unelevated: true,
-        noCaps: true,
-      },
-    },
-  },
-
   extras: {
     fontIcons: [
       'mdi-v7',
@@ -29,7 +22,7 @@ export const quasarOptions: ModuleOptions = {
   },
 
   config: {
-    dark: true,
+    dark: false,
     loading: {
       message: 'Carregando...',
       spinnerColor: 'primary',

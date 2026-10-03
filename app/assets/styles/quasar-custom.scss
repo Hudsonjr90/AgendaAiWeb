@@ -13,8 +13,26 @@
   -webkit-backdrop-filter: blur(12px);
 }
 
+.border-radius {
+  border-radius: 16px;
+}
+
 .link-decoration-none {
   color: $primary;
   text-decoration: none;
   cursor: pointer;
+}
+
+.position {
+  position: absolute;
+  bottom: 5px;
+  left: 0;
+  width: 100%;
+}
+
+.forgot-password {
+  position: absolute;
+  bottom: 40px;
+  left: 60px;
+  width: 100%;
 }
