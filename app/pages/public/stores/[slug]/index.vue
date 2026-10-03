@@ -1,4 +1,3 @@
-
 <template>
   <q-page class="wrapper" :style="themeStyles">
     <!-- Carregamento -->
@@ -40,9 +39,9 @@
 
     <template v-else>
       <!-- Apresentação -->
-      <section id="inicio" class="store-hero">
+      <section id="inicio">
         <div
-          class="row items-center q-col-gutter-xl q-px-md q-px-lg-xl q-py-xl store-container"
+          class="row items-center q-col-gutter-xl q-px-md q-px-lg-xl q-py-xl"
         >
           <div class="col-12 col-md-7">
             <q-badge
@@ -66,6 +65,18 @@
                 color="primary"
                 :text-color="primaryTextColor"
                 unelevated
+                rounded
+                size="md"
+                no-caps
+                icon="mdi-calendar-clock-outline"
+                label="Agendar horário"
+                :to="bookingLink"
+              />
+
+              <q-btn
+                color="primary"
+                :text-color="primaryTextColor"
+                outline
                 rounded
                 size="md"
                 no-caps
@@ -93,21 +104,14 @@
           </div>
 
           <div class="col-12 col-md-5 flex flex-center">
-            <div class="store-visual q-pa-lg">
-              <q-avatar
-                v-if="store.theme?.logoUrl"
-                size="112px"
-                class="store-visual-logo"
-              >
-                <img
-                  :src="store.theme.logoUrl"
-                  :alt="`Logo ${store.name}`"
-                />
+            <div class="q-pa-lg">
+              <q-avatar v-if="store.theme?.logoUrl" class="store-visual-logo">
+                <img :src="store.theme.logoUrl" :alt="`Logo ${store.name}`" />
               </q-avatar>
 
               <q-avatar
                 v-else
-                size="112px"
+                size="100%"
                 color="primary"
                 :text-color="primaryTextColor"
                 class="store-visual-logo"
@@ -122,206 +126,56 @@
               <div class="text-caption text-grey-7 text-center q-mt-xs">
                 Sua experiência começa aqui
               </div>
-
-              <div class="store-visual-accent q-mt-md" />
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Informações -->
-      <section
-        id="informacoes"
-        class="q-px-md q-px-lg-xl q-py-xl store-container"
-      >
-        <div class="text-center q-mb-xl">
-          <div class="text-overline text-primary text-weight-bold">
-            ENCONTRE-NOS
-          </div>
-
-          <h2 class="text-h4 text-weight-bold q-mt-sm q-mb-sm">
-            Estamos esperando por você
-          </h2>
-
-          <p class="text-body2 text-grey-7 q-mx-auto store-section-description">
-            Confira as informações da nossa loja e entre em contato sempre que
-            precisar.
-          </p>
-        </div>
-
-        <div class="row q-col-gutter-md">
-          <!-- Endereço -->
-          <div class="col-12 col-md-4">
-            <q-card flat bordered class="full-height store-info-card">
-              <q-card-section>
-                <q-avatar
-                  color="primary"
-                  :text-color="primaryTextColor"
-                  size="48px"
-                >
-                  <q-icon name="mdi-map-marker-outline" size="26px" />
-                </q-avatar>
-
-                <div class="text-subtitle1 text-weight-bold q-mt-md">
-                  Nosso endereço
-                </div>
-
-                <p class="text-body2 text-grey-7 q-mt-sm q-mb-sm">
-                  {{ fullAddress || 'Endereço não informado.' }}
-                </p>
-
-                <q-btn
-                  v-if="mapsUrl"
-                  flat
-                  dense
-                  no-caps
-                  color="primary"
-                  icon-right="mdi-open-in-new"
-                  label="Ver no mapa"
-                  :href="mapsUrl"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                />
-              </q-card-section>
-            </q-card>
-          </div>
-
-          <!-- Contato -->
-          <div class="col-12 col-md-4">
-            <q-card flat bordered class="full-height store-info-card">
-              <q-card-section>
-                <q-avatar
-                  color="primary"
-                  :text-color="primaryTextColor"
-                  size="48px"
-                >
-                  <q-icon name="mdi-whatsapp" size="26px" />
-                </q-avatar>
-
-                <div class="text-subtitle1 text-weight-bold q-mt-md">
-                  Fale conosco
-                </div>
-
-                <p class="text-body2 text-grey-7 q-mt-sm q-mb-sm">
-                  {{ store.phone || 'Telefone não informado.' }}
-                </p>
-
-                <q-btn
-                  v-if="store.phone"
-                  flat
-                  dense
-                  no-caps
-                  color="primary"
-                  icon-right="mdi-whatsapp"
-                  label="Entrar em contato"
-                  :href="phoneUrl"
-                />
-              </q-card-section>
-            </q-card>
-          </div>
-
-          <!-- Identidade visual -->
-          <div class="col-12 col-md-4">
-            <q-card flat bordered class="full-height store-info-card">
-              <q-card-section>
-                <q-avatar
-                  color="primary"
-                  :text-color="primaryTextColor"
-                  size="48px"
-                >
-                  <q-icon name="mdi-palette-outline" size="26px" />
-                </q-avatar>
-
-                <div class="text-subtitle1 text-weight-bold q-mt-md">
-                  Nossa identidade
-                </div>
-
-                <p class="text-body2 text-grey-7 q-mt-sm q-mb-md">
-                  Uma experiência com a identidade visual da nossa loja.
-                </p>
-
-                <div class="row items-center q-gutter-sm">
-                  <q-avatar
-                    size="24px"
-                    :style="{ backgroundColor: theme.primaryColor }"
-                  />
-                  <q-avatar
-                    size="24px"
-                    :style="{ backgroundColor: theme.secondaryColor }"
-                  />
-                  <q-avatar
-                    size="24px"
-                    :style="{ backgroundColor: theme.accentColor }"
-                  />
-                </div>
-              </q-card-section>
-            </q-card>
-          </div>
-        </div>
-      </section>
-
-      <!-- Prévia do agendamento -->
-      <section
-        id="agendamento"
-        class="q-px-md q-px-lg-xl q-pb-xl store-container"
-      >
-        <q-card flat class="store-booking-card">
+      <section id="agendamento" class="q-px-md q-px-lg-xl q-py-xl">
+        <q-card flat class="">
           <q-card-section class="row items-center q-col-gutter-md">
             <div class="col-auto">
-              <q-avatar
-                color="white"
-                text-color="primary"
-                size="56px"
-              >
+              <q-avatar color="white" text-color="primary" size="56px">
                 <q-icon name="mdi-calendar-clock-outline" size="30px" />
               </q-avatar>
             </div>
 
-            <div class="col">
-              <div class="text-h6 text-weight-bold">
-                Agendamento online
-              </div>
+            <div class="col-12 col-sm">
+              <div class="text-h6 text-weight-bold">Agendamento online</div>
 
               <p class="text-body2 q-mt-xs q-mb-none">
-                Em breve você poderá conferir nossos serviços, escolher um
-                profissional e agendar seu horário por aqui.
+                Confira nossos serviços, conheça os profissionais e prepare seu
+                próximo agendamento.
               </p>
             </div>
 
             <div class="col-12 col-sm-auto">
-              <q-badge
-                color="primary"
-                :text-color="primaryTextColor"
-                rounded
-                class="q-px-md q-py-sm"
-                label="Em breve"
-              />
+              <div class="row items-center q-gutter-sm">
+                <q-btn
+                  unelevated
+                  no-caps
+                  rounded
+                  color="primary"
+                  :text-color="primaryTextColor"
+                  icon="mdi-account-circle-outline"
+                  label="Agendamentos"
+                  :to="accountPath"
+                />
+
+                <q-btn
+                  outline
+                  no-caps
+                  rounded
+                  color="primary"
+                  icon="mdi-calendar-clock-outline"
+                  label="Agendar"
+                  :to="bookingLink"
+                />
+              </div>
             </div>
           </q-card-section>
         </q-card>
       </section>
-
-      <!-- Rodapé -->
-      <q-separator />
-
-      <footer
-        class="row items-center justify-between q-py-lg q-px-md q-px-lg-xl store-container"
-      >
-        <div class="column">
-          <span class="text-subtitle2 text-weight-bold">
-            {{ store.name }}
-          </span>
-
-          <span class="text-caption text-grey-7">
-            Uma experiência feita para você.
-          </span>
-        </div>
-
-        <div class="text-caption text-grey-7">
-          Desenvolvido com
-          <strong class="text-primary">AgendaAi</strong>
-        </div>
-      </footer>
     </template>
   </q-page>
 </template>
@@ -329,6 +183,7 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
 import type { CSSProperties } from 'vue'
+import { useCustomerAuthStore } from '~/stores/customer-auth'
 
 interface StoreTheme {
   id?: string
@@ -380,8 +235,19 @@ definePageMeta({
 
 const route = useRoute()
 const api = useApi()
+const auth = useCustomerAuthStore()
 
 const storeSlug = computed(() => String(route.params.slug ?? ''))
+const storePath = computed(
+  () => `/public/stores/${encodeURIComponent(storeSlug.value)}`,
+)
+const loginPath = computed(() => `${storePath.value}/login`)
+const registerPath = computed(() => `${storePath.value}/register`)
+const accountPath = computed(() => `${storePath.value}/account`)
+const bookingLink = computed(() => ({
+  path: storePath.value,
+  hash: '#agendamento',
+}))
 
 const {
   data: store,
@@ -415,14 +281,11 @@ const theme = computed(() => {
   }
 })
 
-const storeHeader = useState<PublicStoreHeader>(
-  'public-store-header',
-  () => ({
-    name: '',
-    logoUrl: null,
-    ...defaultTheme,
-  }),
-)
+const storeHeader = useState<PublicStoreHeader>('public-store-header', () => ({
+  name: '',
+  logoUrl: null,
+  ...defaultTheme,
+}))
 
 watch(
   [store, theme],
@@ -468,9 +331,7 @@ const getReadableTextColor = (hex: string): string => {
   const blue = Number.parseInt(normalized.slice(4, 6), 16) / 255
 
   const linearize = (value: number) =>
-    value <= 0.04045
-      ? value / 12.92
-      : ((value + 0.055) / 1.055) ** 2.4
+    value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
 
   const luminance =
     0.2126 * linearize(red) +
@@ -537,25 +398,12 @@ useHead(() => ({
 </script>
 
 <style scoped>
-.public-store {
-  min-height: 100vh;
-  color: #2b2726;
-  background: #ffffff;
-}
-
-.store-container {
-  width: min(100%, 1200px);
-  margin-right: auto;
-  margin-left: auto;
-}
-
 .store-hero {
-  background:
-    linear-gradient(
-      110deg,
-      color-mix(in srgb, var(--store-primary) 7%, white),
-      color-mix(in srgb, var(--store-accent) 4%, white)
-    );
+  background: linear-gradient(
+    110deg,
+    color-mix(in srgb, var(--store-primary) 7%, white),
+    color-mix(in srgb, var(--store-accent) 4%, white)
+  );
 }
 
 .store-badge {
@@ -576,25 +424,10 @@ useHead(() => ({
   line-height: 1.8;
 }
 
-.store-visual {
-  display: flex;
-  width: min(100%, 310px);
-  min-height: 280px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  border-radius: 24px;
-  background: #ffffff;
-  box-shadow:
-    0 20px 55px
-    color-mix(in srgb, var(--store-primary) 13%, transparent);
-}
-
 .store-visual-logo {
   overflow: hidden;
-  width: 112px;
-  height: 112px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
 }
 
@@ -602,45 +435,6 @@ useHead(() => ({
   width: 100%;
   height: 100%;
   object-fit: contain;
-}
-
-.store-visual-accent {
-  width: 42px;
-  height: 4px;
-  border-radius: 8px;
-  background: linear-gradient(
-    90deg,
-    var(--store-primary),
-    var(--store-accent)
-  );
-}
-
-.store-section-description {
-  max-width: 620px;
-}
-
-.store-info-card {
-  border-radius: 16px;
-  transition:
-    box-shadow 180ms ease,
-    transform 180ms ease;
-}
-
-.store-info-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.07);
-}
-
-.store-booking-card {
-  border: 1px solid
-    color-mix(in srgb, var(--store-primary) 14%, white);
-  border-radius: 20px;
-  color: #2b2726;
-  background: linear-gradient(
-    110deg,
-    color-mix(in srgb, var(--store-primary) 7%, white),
-    color-mix(in srgb, var(--store-accent) 4%, white)
-  );
 }
 
 @media (max-width: 599px) {
