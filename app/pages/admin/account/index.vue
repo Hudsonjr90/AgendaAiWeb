@@ -91,11 +91,12 @@
 
             <div class="col-12 col-md-6">
               <q-input
-                :model-value="user?.cpf ?? ''"
+                v-model="form.cpf"
+                mask="###.###.###-##"
+                unmasked-value
                 outlined
                 dense
                 label="CPF"
-                autocomplete="cpf"
                 :readonly="!editing"
               >
                 <template #prepend>
@@ -106,37 +107,18 @@
 
             <div class="col-12 col-md-6">
               <q-input
-                :model-value="user?.phone ?? ''"
+                v-model="form.phone"
+                mask="(##) #####-####"
+                unmasked-value
                 outlined
                 dense
                 label="Telefone"
-                autocomplete="tel"
                 :readonly="!editing"
               >
                 <template #prepend>
-                  <q-icon name="mdi-phone-outline" />
+                  <q-icon name="mdi-whatsapp" />
                 </template>
               </q-input>
-            </div>
-
-            <div v-if="errorMessage" class="col-12">
-              <q-banner dense rounded class="bg-red-1 text-negative">
-                <template #avatar>
-                  <q-icon name="mdi-alert-circle-outline" />
-                </template>
-
-                {{ errorMessage }}
-              </q-banner>
-            </div>
-
-            <div v-if="successMessage" class="col-12">
-              <q-banner dense rounded class="bg-green-1 text-positive">
-                <template #avatar>
-                  <q-icon name="mdi-check-circle-outline" />
-                </template>
-
-                {{ successMessage }}
-              </q-banner>
             </div>
 
             <div v-if="editing" class="col-12 row q-gutter-sm">
@@ -168,6 +150,7 @@
 </template>
 
 <script setup lang="ts">
+import { useQuasar } from 'quasar'
 import type { User } from '~/types/api'
 
 definePageMeta({
@@ -177,14 +160,13 @@ definePageMeta({
 })
 
 const api = useApi()
+const $q = useQuasar()
 const authStore = useAuthStore()
 const { initials } = useUserInitials()
 
 const user = ref<User | null>(null)
 const loading = ref(false)
 const editing = ref(false)
-const errorMessage = ref('')
-const successMessage = ref('')
 
 const form = reactive({
   firstName: '',
@@ -221,7 +203,6 @@ const fullNameField = computed({
 
 const fetchUser = async () => {
   loading.value = true
-  errorMessage.value = ''
 
   try {
     const response = await api<User>('/users/me')
@@ -240,16 +221,16 @@ const fetchUser = async () => {
   } catch (error) {
     console.error(error)
 
-    errorMessage.value = 'Não foi possível carregar seus dados.'
+    $q.notify({
+      type: 'negative',
+      message: 'Não foi possível carregar seus dados.',
+    })
   } finally {
     loading.value = false
   }
 }
 
 const startEditing = () => {
-  successMessage.value = ''
-  errorMessage.value = ''
-
   originalForm.firstName = form.firstName
   originalForm.lastName = form.lastName
   originalForm.phone = form.phone
@@ -264,19 +245,18 @@ const cancelEditing = () => {
   form.phone = originalForm.phone
   form.cpf = originalForm.cpf
 
-  errorMessage.value = ''
   editing.value = false
 }
 
 const handleSave = async () => {
-  errorMessage.value = ''
-  successMessage.value = ''
-
   const fullNameValue = `${form.firstName} ${form.lastName}`.trim()
   const parts = fullNameValue.split(/\s+/).filter(Boolean)
 
   if (parts.length < 2) {
-    errorMessage.value = 'Informe nome e sobrenome.'
+    $q.notify({
+      type: 'negative',
+      message: 'Informe nome e sobrenome.',
+    })
     return
   }
 
@@ -317,11 +297,17 @@ const handleSave = async () => {
 
     editing.value = false
 
-    successMessage.value = 'Seus dados foram atualizados com sucesso.'
+    $q.notify({
+      type: 'positive',
+      message: 'Seus dados foram atualizados com sucesso.',
+    })
   } catch (error) {
     console.error(error)
 
-    errorMessage.value = 'Não foi possível atualizar seus dados.'
+    $q.notify({
+      type: 'negative',
+      message: 'Não foi possível atualizar seus dados.',
+    })
   } finally {
     loading.value = false
   }

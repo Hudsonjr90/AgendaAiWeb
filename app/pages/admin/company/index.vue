@@ -135,40 +135,6 @@
             </div>
 
             <div
-              v-if="errorMessage"
-              class="col-12"
-            >
-              <q-banner
-                dense
-                rounded
-                class="bg-red-1 text-negative"
-              >
-                <template #avatar>
-                  <q-icon name="mdi-alert-circle-outline" />
-                </template>
-
-                {{ errorMessage }}
-              </q-banner>
-            </div>
-
-            <div
-              v-if="successMessage"
-              class="col-12"
-            >
-              <q-banner
-                dense
-                rounded
-                class="bg-green-1 text-positive"
-              >
-                <template #avatar>
-                  <q-icon name="mdi-check-circle-outline" />
-                </template>
-
-                {{ successMessage }}
-              </q-banner>
-            </div>
-
-            <div
               v-if="editing"
               class="col-12 row q-gutter-sm"
             >
@@ -200,6 +166,7 @@
 </template>
 
 <script setup lang="ts">
+import { useQuasar } from 'quasar'
 import type { Organization } from '~/types/api'
 
 definePageMeta({
@@ -209,12 +176,11 @@ definePageMeta({
 })
 
 const api = useApi()
+const $q = useQuasar()
 
 const company = ref<Organization | null>(null)
 const loading = ref(false)
 const editing = ref(false)
-const errorMessage = ref('')
-const successMessage = ref('')
 
 const form = reactive({
   name: '',
@@ -228,7 +194,6 @@ const originalForm = reactive({
 
 const fetchCompany = async () => {
   loading.value = true
-  errorMessage.value = ''
 
   try {
     const response = await api<Organization>(
@@ -245,17 +210,16 @@ const fetchCompany = async () => {
   } catch (error) {
     console.error(error)
 
-    errorMessage.value =
-      'Não foi possível carregar os dados da empresa.'
+    $q.notify({
+      type: 'negative',
+      message: 'Não foi possível carregar os dados da empresa.',
+    })
   } finally {
     loading.value = false
   }
 }
 
 const startEditing = () => {
-  successMessage.value = ''
-  errorMessage.value = ''
-
   originalForm.name = form.name
   originalForm.slug = form.slug
 
@@ -266,23 +230,23 @@ const cancelEditing = () => {
   form.name = originalForm.name
   form.slug = originalForm.slug
 
-  errorMessage.value = ''
   editing.value = false
 }
 
 const handleSave = async () => {
-  errorMessage.value = ''
-  successMessage.value = ''
-
   if (!form.name.trim()) {
-    errorMessage.value =
-      'Informe o nome da empresa.'
+    $q.notify({
+      type: 'negative',
+      message: 'Informe o nome da empresa.',
+    })
     return
   }
 
   if (!form.slug.trim()) {
-    errorMessage.value =
-      'Informe o identificador da empresa.'
+    $q.notify({
+      type: 'negative',
+      message: 'Informe o identificador da empresa.',
+    })
     return
   }
 
@@ -310,13 +274,17 @@ const handleSave = async () => {
 
     editing.value = false
 
-    successMessage.value =
-      'Dados da empresa atualizados com sucesso.'
+    $q.notify({
+      type: 'positive',
+      message: 'Dados da empresa atualizados com sucesso.',
+    })
   } catch (error) {
     console.error(error)
 
-    errorMessage.value =
-      'Não foi possível atualizar os dados da empresa.'
+    $q.notify({
+      type: 'negative',
+      message: 'Não foi possível atualizar os dados da empresa.',
+    })
   } finally {
     loading.value = false
   }

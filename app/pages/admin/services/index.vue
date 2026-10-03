@@ -292,25 +292,13 @@
       </q-card>
     </q-dialog>
 
-    <q-banner
-      v-if="pageError"
-      class="bg-red-1 text-negative q-mt-md"
-      rounded
-    >
-      <template #avatar>
-        <q-icon name="mdi-alert" />
-      </template>
-      {{ pageError }}
-      <template #action>
-        <q-btn flat color="negative" label="Fechar" @click="pageError = ''" />
-      </template>
-    </q-banner>
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useQuasar } from 'quasar'
+import { getErrorMessage } from '~/utils/global'
 
 definePageMeta({
   layout: 'admin',
@@ -344,7 +332,6 @@ const services = ref<Service[]>([])
 const loading = ref(false)
 const saving = ref(false)
 const deleting = ref(false)
-const pageError = ref('')
 const filter = ref('')
 
 const formDialog = ref(false)
@@ -429,30 +416,22 @@ function formatCurrency(priceCents: number) {
   }).format(priceCents / 100)
 }
 
-function getErrorMessage(error: unknown, fallback: string) {
-  const err = error as {
-    data?: { message?: string | string[] }
-    response?: { _data?: { message?: string | string[] } }
-    message?: string
-  }
-
-  const message = err?.data?.message
-    ?? err?.response?._data?.message
-    ?? err?.message
-
-  return Array.isArray(message) ? message.join(', ') : message || fallback
+function notifyError(error: unknown, fallback: string) {
+  $q.notify({
+    type: 'negative',
+    message: getErrorMessage(error, fallback),
+  })
 }
 
 async function loadServices() {
   loading.value = true
-  pageError.value = ''
 
   try {
     services.value = await api<Service[]>('/services', {
       method: 'GET',
     })
   } catch (error) {
-    pageError.value = getErrorMessage(error, 'Não foi possível carregar os serviços.')
+    notifyError(error, 'Não foi possível carregar os serviços.')
   } finally {
     loading.value = false
   }
@@ -490,7 +469,6 @@ async function saveService() {
   }
 
   saving.value = true
-  pageError.value = ''
 
   try {
     if (editingService.value) {
@@ -516,7 +494,7 @@ async function saveService() {
     formDialog.value = false
     await loadServices()
   } catch (error) {
-    pageError.value = getErrorMessage(error, 'Não foi possível salvar o serviço.')
+    notifyError(error, 'Não foi possível salvar o serviço.')
   } finally {
     saving.value = false
   }
@@ -531,7 +509,6 @@ async function deleteService() {
   if (!selectedService.value || deleting.value) return
 
   deleting.value = true
-  pageError.value = ''
 
   try {
     await api(`/services/${selectedService.value.id}`, {
@@ -545,7 +522,7 @@ async function deleteService() {
     })
     await loadServices()
   } catch (error) {
-    pageError.value = getErrorMessage(error, 'Não foi possível excluir o serviço.')
+    notifyError(error, 'Não foi possível excluir o serviço.')
   } finally {
     deleting.value = false
   }

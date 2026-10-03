@@ -45,7 +45,9 @@
       <div class="col-12 col-sm-4">
         <q-card flat bordered>
           <q-card-section>
-            <div class="text-caption text-grey-7">Inativos ou bloqueados</div>
+            <div class="text-caption text-grey-7">
+              Inativos ou bloqueados
+            </div>
             <div class="text-h4 text-weight-bold text-grey-8">
               {{ customers.length - countByStatus('ACTIVE') }}
             </div>
@@ -111,24 +113,30 @@
         <template #body-cell-customer="props">
           <q-td :props="props">
             <div class="row items-center no-wrap q-gutter-sm">
-              <q-avatar color="primary" text-color="white" size="38px">
-                {{ initials(props.row) }}
-              </q-avatar>
               <div class="column">
                 <span class="text-weight-medium">
                   {{ fullName(props.row) }}
-                </span>
-                <span class="text-caption text-grey-7">
-                  {{ props.row.email || 'Sem e-mail informado' }}
                 </span>
               </div>
             </div>
           </q-td>
         </template>
 
+        <template #body-cell-email="props">
+          <q-td :props="props">
+            {{ props.row.email || 'Sem e-mail informado' }}
+          </q-td>
+        </template>
+
+        <template #body-cell-cpf="props">
+          <q-td :props="props">
+            {{ cpfFormat(props.row.cpf) || '—' }}
+          </q-td>
+        </template>
+
         <template #body-cell-phone="props">
           <q-td :props="props">
-            {{ props.row.phone || '—' }}
+            {{ phoneFormat(props.row.phone) || '—' }}
           </q-td>
         </template>
 
@@ -216,7 +224,8 @@
                   maxlength="100"
                   :rules="[
                     (value) =>
-                      (!!value && value.trim().length >= 2) || 'Informe o nome',
+                      (!!value && value.trim().length >= 2) ||
+                      'Informe o nome',
                   ]"
                 />
               </div>
@@ -236,28 +245,58 @@
               </div>
             </div>
 
-            <q-input
-              v-model.trim="form.email"
-              outlined
-              type="email"
-              label="E-mail"
-              maxlength="254"
-              :rules="[
-                (value) =>
-                  !value ||
-                  /.+@.+\..+/.test(value) ||
-                  'Informe um e-mail válido',
-              ]"
-            />
+            <div class="row q-col-gutter-md q-ml-xs q-mt-sm">
+              <div class="col-12 col-sm-6">
+                <q-input
+                  v-model.trim="form.cpf"
+                  outlined
+                  label="CPF"
+                  mask="###.###.###-##"
+                  unmasked-value
+                  :rules="[
+                    (value) =>
+                      !value ||
+                      isValidCpf(value) ||
+                      'Informe um CPF válido',
+                  ]"
+                />
+              </div>
 
-            <q-input
-              v-model.trim="form.phone"
-              outlined
-              label="Telefone"
-              mask="(##) #####-####"
-              unmasked-value
-              hint="DDD + número"
-            />
+              <div class="col-12 col-sm-6">
+                <q-input
+                  v-model.trim="form.email"
+                  outlined
+                  type="email"
+                  label="E-mail"
+                  maxlength="254"
+                  :rules="[
+                    (value) =>
+                      !value ||
+                      /.+@.+\..+/.test(value) ||
+                      'Informe um e-mail válido',
+                  ]"
+                />
+              </div>
+            </div>
+
+            <div class="row q-col-gutter-md q-ml-xs q-mt-sm">
+              <div class="col-12 col-sm-6">
+                <q-input
+                  v-model.trim="form.phone"
+                  outlined
+                  label="Telefone"
+                  mask="(##) #####-####"
+                  unmasked-value
+                  hint="DDD + número"
+                  :rules="[
+                    (value) =>
+                      !value ||
+                      /^\d{10,11}$/.test(value) ||
+                      'Informe um telefone válido',
+                  ]"
+                />
+              </div>
+            </div>
 
             <q-select
               v-if="editingCustomer"
@@ -281,6 +320,7 @@
               color="grey-7"
               :disable="saving"
             />
+
             <q-btn
               type="submit"
               color="primary"
@@ -306,15 +346,26 @@
 
         <q-separator />
 
-        <q-card-section v-if="selectedCustomer" class="q-gutter-md">
+        <q-card-section
+          v-if="selectedCustomer"
+          class="q-gutter-md"
+        >
           <div class="row items-center q-gutter-md">
-            <q-avatar color="primary" text-color="white" size="56px">
+            <q-avatar
+              color="primary"
+              text-color="white"
+              size="56px"
+            >
               {{ initials(selectedCustomer) }}
             </q-avatar>
+
             <div>
-              <div class="text-h6">{{ fullName(selectedCustomer) }}</div>
+              <div class="text-h6">
+                {{ fullName(selectedCustomer) }}
+              </div>
+
               <q-badge
-                 class="q-py-xs"
+                class="q-py-xs"
                 :color="statusColor(selectedCustomer.status)"
                 :label="statusLabel(selectedCustomer.status)"
               />
@@ -325,7 +376,9 @@
 
           <div>
             <div class="text-caption text-grey-7">E-mail</div>
-            <div>{{ selectedCustomer.email || 'Não informado' }}</div>
+            <div>
+              {{ selectedCustomer.email || 'Não informado' }}
+            </div>
           </div>
 
           <div>
@@ -336,8 +389,17 @@
           </div>
 
           <div>
+            <div class="text-caption text-grey-7">CPF</div>
+            <div>
+              {{ cpfFormat(selectedCustomer.cpf || 'Não informado') }}
+            </div>
+          </div>
+
+          <div>
             <div class="text-caption text-grey-7">Cadastrado em</div>
-            <div>{{ formatDate(selectedCustomer.createdAt) }}</div>
+            <div>
+              {{ formatDate(selectedCustomer.createdAt) }}
+            </div>
           </div>
         </q-card-section>
 
@@ -356,16 +418,25 @@
     <q-dialog v-model="deleteDialog" persistent>
       <q-card style="width: 420px; max-width: 95vw">
         <q-card-section class="row items-center q-gutter-sm">
-          <q-icon name="mdi-delete" color="negative" size="md" />
+          <q-icon
+            name="mdi-delete"
+            color="negative"
+            size="md"
+          />
           <div class="text-h6">Excluir cliente</div>
         </q-card-section>
 
         <q-card-section>
           Deseja realmente excluir
-          <strong>{{
-            selectedCustomer ? fullName(selectedCustomer) : ''
-          }}</strong
-          > ? <br/>
+          <strong>
+            {{
+              selectedCustomer
+                ? fullName(selectedCustomer)
+                : ''
+            }}
+          </strong>
+          ?
+          <br />
           A operação pode ser impedida caso existam vínculos relacionados.
         </q-card-section>
 
@@ -378,6 +449,7 @@
             color="grey-7"
             :disable="deleting"
           />
+
           <q-btn
             color="negative"
             unelevated
@@ -389,22 +461,13 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-
-    <q-banner v-if="pageError" class="bg-red-1 text-negative q-mt-md" rounded>
-      <template #avatar>
-        <q-icon name="mdi-error-outline" />
-      </template>
-      {{ pageError }}
-      <template #action>
-        <q-btn flat color="negative" label="Fechar" @click="pageError = ''" />
-      </template>
-    </q-banner>
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useQuasar } from 'quasar'
+import { phoneFormat, cpfFormat } from '../../../utils/global'
 
 definePageMeta({
   layout: 'admin',
@@ -416,12 +479,12 @@ type CustomerStatus = 'ACTIVE' | 'INACTIVE' | 'BLOCKED'
 
 interface Customer {
   id: string
-  userId: string
   organizationId: string
   firstName: string | null
   lastName: string | null
   email: string | null
   phone: string | null
+  cpf: string | null
   status: CustomerStatus
   createdAt: string
   updatedAt: string
@@ -434,7 +497,6 @@ const customers = ref<Customer[]>([])
 const loading = ref(false)
 const saving = ref(false)
 const deleting = ref(false)
-const pageError = ref('')
 const filter = ref('')
 const statusFilter = ref<CustomerStatus | null>(null)
 
@@ -445,11 +507,11 @@ const editingCustomer = ref<Customer | null>(null)
 const selectedCustomer = ref<Customer | null>(null)
 
 const emptyForm = () => ({
-  userId: '',
   firstName: '',
   lastName: '',
   email: '',
   phone: '',
+  cpf: '',
   status: 'ACTIVE' as CustomerStatus,
 })
 
@@ -459,9 +521,22 @@ const columns = [
   {
     name: 'customer',
     label: 'Cliente',
-    field: (row: Customer) => `${row.firstName ?? ''} ${row.lastName ?? ''}`,
+    field: (row: Customer) =>
+      `${row.firstName ?? ''} ${row.lastName ?? ''}`,
     align: 'left' as const,
     sortable: true,
+  },
+  {
+    name: 'email',
+    label: 'E-mail',
+    field: 'email',
+    align: 'left' as const,
+  },
+  {
+    name: 'cpf',
+    label: 'CPF',
+    field: 'cpf',
+    align: 'left' as const,
   },
   {
     name: 'phone',
@@ -503,11 +578,14 @@ const statusFilterOptions = [
 ]
 
 const filteredCustomers = computed(() => {
-  const term = filter.value.trim().toLocaleLowerCase('pt-BR')
+  const term = filter.value
+    .trim()
+    .toLocaleLowerCase('pt-BR')
 
   return customers.value.filter((customer) => {
     const matchesStatus =
-      !statusFilter.value || customer.status === statusFilter.value
+      !statusFilter.value ||
+      customer.status === statusFilter.value
 
     const searchText = [
       customer.firstName,
@@ -518,12 +596,17 @@ const filteredCustomers = computed(() => {
       .join(' ')
       .toLocaleLowerCase('pt-BR')
 
-    return matchesStatus && (!term || searchText.includes(term))
+    return (
+      matchesStatus &&
+      (!term || searchText.includes(term))
+    )
   })
 })
 
 function countByStatus(status: CustomerStatus) {
-  return customers.value.filter((customer) => customer.status === status).length
+  return customers.value.filter(
+    (customer) => customer.status === status,
+  ).length
 }
 
 function fullName(customer: Customer) {
@@ -539,7 +622,9 @@ function initials(customer: Customer) {
       .split(/\s+/)
       .filter(Boolean)
       .slice(0, 2)
-      .map((part) => part.charAt(0).toLocaleUpperCase('pt-BR'))
+      .map((part) =>
+        part.charAt(0).toLocaleUpperCase('pt-BR'),
+      )
       .join('') || 'C'
   )
 }
@@ -568,7 +653,10 @@ function formatDate(value?: string) {
   if (!value) return '—'
 
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return '—'
+
+  if (Number.isNaN(date.getTime())) {
+    return '—'
+  }
 
   return new Intl.DateTimeFormat('pt-BR', {
     dateStyle: 'short',
@@ -581,29 +669,54 @@ function isUuid(value: string) {
   )
 }
 
-function getErrorMessage(error: unknown, fallback: string) {
+function getErrorMessage(
+  error: unknown,
+  fallback: string,
+) {
   const err = error as {
-    data?: { message?: string | string[] }
-    response?: { _data?: { message?: string | string[] } }
+    data?: {
+      message?: string | string[]
+    }
+    response?: {
+      _data?: {
+        message?: string | string[]
+      }
+    }
     message?: string
   }
 
   const message =
-    err?.data?.message ?? err?.response?._data?.message ?? err?.message
+    err?.data?.message ??
+    err?.response?._data?.message ??
+    err?.message
 
-  return Array.isArray(message) ? message.join(', ') : message || fallback
+  return Array.isArray(message)
+    ? message.join(', ')
+    : message || fallback
+}
+
+function notifyError(
+  error: unknown,
+  fallback: string,
+) {
+  $q.notify({
+    type: 'negative',
+    message: getErrorMessage(error, fallback),
+  })
 }
 
 async function loadCustomers() {
   loading.value = true
-  pageError.value = ''
 
   try {
-    customers.value = await api<Customer[]>('/customers', {
-      method: 'GET',
-    })
+    customers.value = await api<Customer[]>(
+      '/customers',
+      {
+        method: 'GET',
+      },
+    )
   } catch (error) {
-    pageError.value = getErrorMessage(
+    notifyError(
       error,
       'Não foi possível carregar os clientes.',
     )
@@ -624,14 +737,16 @@ function openCreateDialog() {
 
 function openEditDialog(customer: Customer) {
   editingCustomer.value = customer
+
   Object.assign(form, {
-    userId: customer.userId,
     firstName: customer.firstName ?? '',
     lastName: customer.lastName ?? '',
     email: customer.email ?? '',
     phone: customer.phone ?? '',
+    cpf: customer.cpf ?? '',
     status: customer.status,
   })
+
   formDialog.value = true
 }
 
@@ -649,47 +764,58 @@ async function saveCustomer() {
   if (saving.value) return
 
   saving.value = true
-  pageError.value = ''
 
   try {
     if (editingCustomer.value) {
-      await api(`/customers/${editingCustomer.value.id}`, {
-        method: 'PATCH',
-        body: {
-          firstName: form.firstName.trim(),
-          lastName: form.lastName.trim(),
-          email: form.email.trim() || undefined,
-          phone: form.phone.trim() || undefined,
-          status: form.status,
+      await api(
+        `/customers/${editingCustomer.value.id}`,
+        {
+          method: 'PATCH',
+          body: {
+            firstName: form.firstName.trim(),
+            lastName: form.lastName.trim(),
+            email:
+              form.email.trim() || undefined,
+            cpf:
+              form.cpf.trim() || undefined,
+            phone:
+              form.phone.trim() || undefined,
+            status: form.status,
+          },
         },
-      })
+      )
 
       $q.notify({
         type: 'positive',
-        message: 'Cliente atualizado com sucesso.',
+        message:
+          'Cliente atualizado com sucesso.',
       })
     } else {
       await api('/customers', {
         method: 'POST',
         body: {
-          userId: form.userId.trim(),
           firstName: form.firstName.trim(),
           lastName: form.lastName.trim(),
-          email: form.email.trim() || undefined,
-          phone: form.phone.trim() || undefined,
+          email:
+            form.email.trim() || undefined,
+          phone:
+            form.phone.trim() || undefined,
+          cpf:
+            form.cpf.trim() || undefined,
         },
       })
 
       $q.notify({
         type: 'positive',
-        message: 'Cliente cadastrado com sucesso.',
+        message:
+          'Cliente cadastrado com sucesso.',
       })
     }
 
     formDialog.value = false
     await loadCustomers()
   } catch (error) {
-    pageError.value = getErrorMessage(
+    notifyError(
       error,
       'Não foi possível salvar o cliente.',
     )
@@ -699,24 +825,34 @@ async function saveCustomer() {
 }
 
 async function deleteCustomer() {
-  if (!selectedCustomer.value || deleting.value) return
+  if (
+    !selectedCustomer.value ||
+    deleting.value
+  ) {
+    return
+  }
 
   deleting.value = true
-  pageError.value = ''
 
   try {
-    await api(`/customers/${selectedCustomer.value.id}`, {
-      method: 'DELETE',
-    })
+    await api(
+      `/customers/${selectedCustomer.value.id}`,
+      {
+        method: 'DELETE',
+      },
+    )
 
     deleteDialog.value = false
+
     $q.notify({
       type: 'positive',
-      message: 'Cliente excluído com sucesso.',
+      message:
+        'Cliente excluído com sucesso.',
     })
+
     await loadCustomers()
   } catch (error) {
-    pageError.value = getErrorMessage(
+    notifyError(
       error,
       'Não foi possível excluir o cliente.',
     )

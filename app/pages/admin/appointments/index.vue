@@ -1,4 +1,3 @@
-
 <template>
   <q-page padding class="wrapper">
     <div class="row items-center justify-between q-col-gutter-md q-mb-lg">
@@ -27,7 +26,9 @@
         <q-card flat bordered>
           <q-card-section>
             <div class="text-caption text-grey-7">Total</div>
-            <div class="text-h4 text-weight-bold">{{ appointments.length }}</div>
+            <div class="text-h4 text-weight-bold">
+              {{ appointments.length }}
+            </div>
           </q-card-section>
         </q-card>
       </div>
@@ -136,10 +137,10 @@
         <template #body-cell-schedule="props">
           <q-td :props="props">
             <div class="text-weight-medium">
-              {{ formatDateTime(props.row.startsAt) }}
+              {{ formatDate(props.row.startsAt) }}
             </div>
             <div class="text-caption text-grey-7">
-              Até {{ formatTime(props.row.endsAt) }}
+              {{ formatTime(props.row.startsAt) }} – {{ formatTime(props.row.endsAt) }}
             </div>
           </q-td>
         </template>
@@ -210,7 +211,7 @@
               color="primary"
               icon="mdi-pencil-outline"
               aria-label="Editar agendamento"
-              :disable="props.row.status === 'CANCELLED'"
+              :disable="!['PENDING', 'CONFIRMED'].includes(props.row.status)"
               @click="openEditDialog(props.row)"
             >
               <q-tooltip>Editar</q-tooltip>
@@ -223,7 +224,9 @@
               color="negative"
               icon="mdi-delete-outline"
               aria-label="Cancelar agendamento"
-              :disable="['CANCELLED', 'COMPLETED', 'NO_SHOW'].includes(props.row.status)"
+              :disable="
+                ['CANCELLED', 'COMPLETED', 'NO_SHOW'].includes(props.row.status)
+              "
               @click="openCancelDialog(props.row)"
             >
               <q-tooltip>Cancelar</q-tooltip>
@@ -242,10 +245,12 @@
         <q-form @submit.prevent="saveAppointment">
           <q-card-section class="row items-center">
             <div class="text-h6">
-              {{ editingAppointment ? 'Editar agendamento' : 'Novo agendamento' }}
+              {{
+                editingAppointment ? 'Editar agendamento' : 'Novo agendamento'
+              }}
             </div>
             <q-space />
-            <q-btn v-close-popup flat round dense icon="close" />
+            <q-btn v-close-popup flat round dense icon="mdi-close" />
           </q-card-section>
 
           <q-separator />
@@ -316,9 +321,6 @@
                 Término estimado:
                 <strong>{{ estimatedEndTime || '—' }}</strong>
               </div>
-              <div class="text-caption text-grey-7">
-                A disponibilidade final será validada pelo servidor.
-              </div>
             </q-banner>
 
             <q-input
@@ -331,25 +333,30 @@
               label="Observações"
             />
 
-            <div v-if="editingAppointment" class="row q-col-gutter-md">
-              <div class="col-12 col-sm-6">
+            <div
+              v-if="editingAppointment"
+              class="row q-col-gutter-md q-ml-none"
+            >
+              <div class="col-12 col-sm-4">
                 <q-select
                   v-model="form.status"
                   outlined
                   emit-value
                   map-options
                   label="Status"
+                  class="full-width"
                   :options="editableStatusOptions"
                 />
               </div>
 
-              <div class="col-12 col-sm-6">
+              <div class="col-12 col-sm-4">
                 <q-select
                   v-model="form.paymentStatus"
                   outlined
                   emit-value
                   map-options
                   label="Pagamento"
+                  class="full-width"
                   :options="paymentOptions"
                 />
               </div>
@@ -372,7 +379,9 @@
               color="primary"
               unelevated
               no-caps
-              :label="editingAppointment ? 'Salvar alterações' : 'Criar agendamento'"
+              :label="
+                editingAppointment ? 'Salvar alterações' : 'Criar agendamento'
+              "
               :loading="saving"
             />
           </q-card-actions>
@@ -419,17 +428,19 @@
           <div>
             <div class="text-caption text-grey-7">Cliente</div>
             <div>{{ customerName(selectedAppointment.customerId) }}</div>
-            <div class="text-caption text-grey-7">
+            <div>
               {{ customerEmail(selectedAppointment.customerId) }}
             </div>
-            <div class="text-caption text-grey-7">
+            <div>
               {{ customerPhone(selectedAppointment.customerId) }}
             </div>
           </div>
 
           <div>
             <div class="text-caption text-grey-7">Profissional</div>
-            <div>{{ professionalName(selectedAppointment.professionalId) }}</div>
+            <div>
+              {{ professionalName(selectedAppointment.professionalId) }}
+            </div>
           </div>
 
           <div>
@@ -444,15 +455,10 @@
             <div class="text-caption text-grey-7">Observações</div>
             <div>{{ selectedAppointment.notes || 'Nenhuma observação.' }}</div>
           </div>
-
-          <div>
-            <div class="text-caption text-grey-7">Identificador</div>
-            <div class="text-caption">{{ selectedAppointment.id }}</div>
-          </div>
         </q-card-section>
 
         <q-card-actions align="right" class="q-pa-md">
-          <q-btn v-close-popup color="primary" label="Fechar" unelevated />
+          <q-btn v-close-popup color="primary" no-caps label="Fechar" unelevated />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -467,16 +473,20 @@
         <q-card-section>
           Confirma o cancelamento do agendamento de
           <strong>
-            {{ selectedAppointment
-              ? customerName(selectedAppointment.customerId)
-              : '' }}
+            {{
+              selectedAppointment
+                ? customerName(selectedAppointment.customerId)
+                : ''
+            }}
           </strong>
           em
           <strong>
-            {{ selectedAppointment
-              ? formatDateTime(selectedAppointment.startsAt)
-              : '' }}
-          </strong>?
+            {{
+              selectedAppointment
+                ? formatDateTime(selectedAppointment.startsAt)
+                : ''
+            }} </strong
+          >?
         </q-card-section>
 
         <q-card-actions align="right" class="q-pa-md">
@@ -497,26 +507,21 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-
-    <q-banner
-      v-if="pageError"
-      class="bg-red-1 text-negative q-mt-md"
-      rounded
-    >
-      <template #avatar>
-        <q-icon name="error_outline" />
-      </template>
-      {{ pageError }}
-      <template #action>
-        <q-btn flat color="negative" label="Fechar" @click="pageError = ''" />
-      </template>
-    </q-banner>
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useQuasar } from 'quasar'
+import {
+  appointmentStatusLabel,
+  formatDate,
+  formatDateTime,
+  formatTime,
+  getErrorMessage,
+  paymentStatusLabel,
+  phoneFormat,
+} from '~/utils/global'
 
 definePageMeta({
   layout: 'admin',
@@ -531,12 +536,7 @@ type AppointmentStatus =
   | 'CANCELLED'
   | 'NO_SHOW'
 
-type PaymentStatus =
-  | 'PENDING'
-  | 'PARTIAL'
-  | 'PAID'
-  | 'REFUNDED'
-  | 'FAILED'
+type PaymentStatus = 'PENDING' | 'PARTIAL' | 'PAID' | 'REFUNDED' | 'FAILED'
 
 interface Store {
   id: string
@@ -597,7 +597,6 @@ const services = ref<Service[]>([])
 const loading = ref(false)
 const saving = ref(false)
 const cancelling = ref(false)
-const pageError = ref('')
 const filter = ref('')
 const storeFilter = ref<string | null>(null)
 const statusFilter = ref<AppointmentStatus | null>(null)
@@ -699,9 +698,10 @@ const storeOptions = computed(() =>
 )
 
 const availableProfessionals = computed(() =>
-  professionals.value.filter((professional) =>
-    professional.status === 'ACTIVE'
-    && (!form.storeId || professional.storeId === form.storeId),
+  professionals.value.filter(
+    (professional) =>
+      professional.status === 'ACTIVE' &&
+      (!form.storeId || professional.storeId === form.storeId),
   ),
 )
 
@@ -743,8 +743,8 @@ const customerOptions = computed(() => {
   ]
 })
 
-const selectedService = computed(() =>
-  services.value.find((service) => service.id === form.serviceId) ?? null,
+const selectedService = computed(
+  () => services.value.find((service) => service.id === form.serviceId) ?? null,
 )
 
 const estimatedEndTime = computed(() => {
@@ -767,27 +767,29 @@ const filteredAppointments = computed(() => {
   const term = filter.value.trim().toLocaleLowerCase('pt-BR')
 
   return appointments.value.filter((appointment) => {
-    const matchesStore = !storeFilter.value
-      || appointment.storeId === storeFilter.value
+    const matchesStore =
+      !storeFilter.value || appointment.storeId === storeFilter.value
 
-    const matchesStatus = !statusFilter.value
-      || appointment.status === statusFilter.value
+    const matchesStatus =
+      !statusFilter.value || appointment.status === statusFilter.value
 
     const searchable = [
       customerName(appointment.customerId),
       professionalName(appointment.professionalId),
       serviceName(appointment.serviceId),
       storeName(appointment.storeId),
-    ].join(' ').toLocaleLowerCase('pt-BR')
+    ]
+      .join(' ')
+      .toLocaleLowerCase('pt-BR')
 
-    return matchesStore
-      && matchesStatus
-      && (!term || searchable.includes(term))
+    return matchesStore && matchesStatus && (!term || searchable.includes(term))
   })
 })
 
 function countByStatus(status: AppointmentStatus) {
-  return appointments.value.filter((appointment) => appointment.status === status).length
+  return appointments.value.filter(
+    (appointment) => appointment.status === status,
+  ).length
 }
 
 function personName(firstName: string | null, lastName: string | null) {
@@ -796,11 +798,14 @@ function personName(firstName: string | null, lastName: string | null) {
 
 function customerName(customerId: string) {
   const customer = customers.value.find((item) => item.id === customerId)
-  return customer ? personName(customer.firstName, customer.lastName) : 'Cliente não localizado'
+  return customer
+    ? personName(customer.firstName, customer.lastName)
+    : 'Cliente não localizado'
 }
 
 function customerPhone(customerId: string) {
-  return customers.value.find((item) => item.id === customerId)?.phone || '—'
+  const phone = customers.value.find((item) => item.id === customerId)?.phone
+  return phone ? phoneFormat(phone) : '—'
 }
 
 function customerEmail(customerId: string) {
@@ -808,15 +813,19 @@ function customerEmail(customerId: string) {
 }
 
 function professionalName(professionalId: string) {
-  const professional = professionals.value.find((item) => item.id === professionalId)
+  const professional = professionals.value.find(
+    (item) => item.id === professionalId,
+  )
   return professional
     ? personName(professional.firstName, professional.lastName)
     : 'Profissional não localizado'
 }
 
 function serviceName(serviceId: string) {
-  return services.value.find((item) => item.id === serviceId)?.name
-    || 'Serviço não localizado'
+  return (
+    services.value.find((item) => item.id === serviceId)?.name ||
+    'Serviço não localizado'
+  )
 }
 
 function servicePrice(serviceId: string) {
@@ -824,20 +833,10 @@ function servicePrice(serviceId: string) {
 }
 
 function storeName(storeId: string) {
-  return stores.value.find((item) => item.id === storeId)?.name
-    || 'Loja não localizada'
-}
-
-function appointmentStatusLabel(status: AppointmentStatus) {
-  const labels: Record<AppointmentStatus, string> = {
-    PENDING: 'Pendente',
-    CONFIRMED: 'Confirmado',
-    COMPLETED: 'Concluído',
-    CANCELLED: 'Cancelado',
-    NO_SHOW: 'Não compareceu',
-  }
-
-  return labels[status]
+  return (
+    stores.value.find((item) => item.id === storeId)?.name ||
+    'Loja não localizada'
+  )
 }
 
 function appointmentStatusColor(status: AppointmentStatus) {
@@ -850,18 +849,6 @@ function appointmentStatusColor(status: AppointmentStatus) {
   }
 
   return colors[status]
-}
-
-function paymentStatusLabel(status: PaymentStatus) {
-  const labels: Record<PaymentStatus, string> = {
-    PENDING: 'Pendente',
-    PARTIAL: 'Parcial',
-    PAID: 'Pago',
-    REFUNDED: 'Reembolsado',
-    FAILED: 'Falhou',
-  }
-
-  return labels[status]
 }
 
 function paymentStatusColor(status: PaymentStatus) {
@@ -883,25 +870,6 @@ function formatCurrency(priceCents: number) {
   }).format(priceCents / 100)
 }
 
-function formatDateTime(value: string) {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return '—'
-
-  return new Intl.DateTimeFormat('pt-BR', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  }).format(date)
-}
-
-function formatTime(value: string) {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return '—'
-
-  return new Intl.DateTimeFormat('pt-BR', {
-    timeStyle: 'short',
-  }).format(date)
-}
-
 function toDateTimeLocal(value: string) {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return ''
@@ -920,33 +888,30 @@ function toIsoDate(value: string) {
   return date.toISOString()
 }
 
-function getErrorMessage(error: unknown, fallback: string) {
-  const err = error as {
-    data?: { message?: string | string[] }
-    response?: { _data?: { message?: string | string[] } }
-    message?: string
-  }
-
-  const message = err?.data?.message
-    ?? err?.response?._data?.message
-    ?? err?.message
-
-  return Array.isArray(message) ? message.join(', ') : message || fallback
+function notifyError(error: unknown, fallback: string) {
+  $q.notify({
+    type: 'negative',
+    message: getErrorMessage(error, fallback),
+  })
 }
 
 async function loadAll() {
   loading.value = true
-  pageError.value = ''
 
   try {
-    const [appointmentData, storeData, customerData, professionalData, serviceData] =
-      await Promise.all([
-        api<Appointment[]>('/appointments', { method: 'GET' }),
-        api<Store[]>('/stores', { method: 'GET' }),
-        api<Customer[]>('/customers', { method: 'GET' }),
-        api<Professional[]>('/professionals', { method: 'GET' }),
-        api<Service[]>('/services', { method: 'GET' }),
-      ])
+    const [
+      appointmentData,
+      storeData,
+      customerData,
+      professionalData,
+      serviceData,
+    ] = await Promise.all([
+      api<Appointment[]>('/appointments', { method: 'GET' }),
+      api<Store[]>('/stores', { method: 'GET' }),
+      api<Customer[]>('/customers', { method: 'GET' }),
+      api<Professional[]>('/professionals', { method: 'GET' }),
+      api<Service[]>('/services', { method: 'GET' }),
+    ])
 
     appointments.value = appointmentData
     stores.value = storeData
@@ -954,7 +919,7 @@ async function loadAll() {
     professionals.value = professionalData
     services.value = serviceData
   } catch (error) {
-    pageError.value = getErrorMessage(
+    notifyError(
       error,
       'Não foi possível carregar os dados dos agendamentos.',
     )
@@ -1003,8 +968,8 @@ function openCancelDialog(appointment: Appointment) {
 
 function onStoreChange() {
   if (
-    form.professionalId
-    && !availableProfessionals.value.some(
+    form.professionalId &&
+    !availableProfessionals.value.some(
       (professional) => professional.id === form.professionalId,
     )
   ) {
@@ -1026,13 +991,17 @@ function filterCustomers(
 
     customerSearchOptions.value = customers.value
       .filter((customer) => {
-        const name = personName(customer.firstName, customer.lastName)
-          .toLocaleLowerCase('pt-BR')
+        const name = personName(
+          customer.firstName,
+          customer.lastName,
+        ).toLocaleLowerCase('pt-BR')
         const email = (customer.email ?? '').toLocaleLowerCase('pt-BR')
         const phone = customer.phone ?? ''
 
-        return customer.status === 'ACTIVE'
-          && `${name} ${email} ${phone}`.includes(term)
+        return (
+          customer.status === 'ACTIVE' &&
+          `${name} ${email} ${phone}`.includes(term)
+        )
       })
       .map((customer) => ({
         label: `${personName(customer.firstName, customer.lastName)}${customer.phone ? ` • ${customer.phone}` : ''}`,
@@ -1045,7 +1014,6 @@ async function saveAppointment() {
   if (saving.value) return
 
   saving.value = true
-  pageError.value = ''
 
   try {
     const startsAt = toIsoDate(form.startsAt)
@@ -1089,7 +1057,7 @@ async function saveAppointment() {
     formDialog.value = false
     await loadAll()
   } catch (error) {
-    pageError.value = getErrorMessage(
+    notifyError(
       error,
       'Não foi possível salvar o agendamento.',
     )
@@ -1102,7 +1070,6 @@ async function cancelAppointment() {
   if (!selectedAppointment.value || cancelling.value) return
 
   cancelling.value = true
-  pageError.value = ''
 
   try {
     await api(`/appointments/${selectedAppointment.value.id}/cancel`, {
@@ -1116,7 +1083,7 @@ async function cancelAppointment() {
     })
     await loadAll()
   } catch (error) {
-    pageError.value = getErrorMessage(
+    notifyError(
       error,
       'Não foi possível cancelar o agendamento.',
     )

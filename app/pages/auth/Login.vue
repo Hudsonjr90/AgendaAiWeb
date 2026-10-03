@@ -71,19 +71,6 @@
           </template>
         </q-input>
 
-        <q-banner
-          v-if="errorMessage"
-          dense
-          rounded
-          class="bg-red-1 text-negative q-mb-md"
-        >
-          <template #avatar>
-            <q-icon name="mdi-alert-circle-outline" />
-          </template>
-
-          {{ errorMessage }}
-        </q-banner>
-
         <q-btn
           type="submit"
           color="primary"
@@ -111,6 +98,7 @@
 </template>
 
 <script setup lang="ts">
+import { useQuasar } from 'quasar'
 import type { LoginResponse } from '~/types/api'
 
 definePageMeta({
@@ -121,18 +109,19 @@ const { isMobile } = useMobile()
 const router = useRouter()
 const authStore = useAuthStore()
 const api = useApi()
+const $q = useQuasar()
 
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const showPassword = ref(false)
-const errorMessage = ref('')
 
 const handleLogin = async () => {
-  errorMessage.value = ''
-
   if (!email.value || !password.value) {
-    errorMessage.value = 'Informe seu e-mail e senha.'
+    $q.notify({
+      type: 'negative',
+      message: 'Informe seu e-mail e senha.',
+    })
     return
   }
 
@@ -152,7 +141,10 @@ const handleLogin = async () => {
     await router.push('/admin/dashboard')
   } catch (error) {
     console.error(error)
-    errorMessage.value = 'E-mail ou senha inválidos.'
+    $q.notify({
+      type: 'negative',
+      message: 'E-mail ou senha inválidos.',
+    })
   } finally {
     loading.value = false
   }

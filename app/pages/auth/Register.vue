@@ -180,19 +180,6 @@
           </template>
         </q-input>
 
-        <q-banner
-          v-if="errorMessage"
-          dense
-          rounded
-          class="bg-red-1 text-negative q-mt-md"
-        >
-          <template #avatar>
-            <q-icon name="mdi-alert-circle-outline" />
-          </template>
-
-          {{ errorMessage }}
-        </q-banner>
-
         <q-btn
           type="submit"
           color="primary"
@@ -220,6 +207,7 @@
 </template>
 
 <script setup lang="ts">
+import { useQuasar } from 'quasar'
 import type { RegisterResponse } from '~/types/api'
 
 definePageMeta({
@@ -228,6 +216,7 @@ definePageMeta({
 
 const router = useRouter()
 const api = useApi()
+const $q = useQuasar()
 
 const firstName = ref('')
 const lastName = ref('')
@@ -240,13 +229,13 @@ const organizationSlug = ref('')
 const loading = ref(false)
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
-const errorMessage = ref('')
 
 const handleRegister = async () => {
-  errorMessage.value = ''
-
   if (password.value !== confirmPassword.value) {
-    errorMessage.value = 'As senhas não coincidem.'
+    $q.notify({
+      type: 'negative',
+      message: 'As senhas não coincidem.',
+    })
     return
   }
 
@@ -275,8 +264,10 @@ const handleRegister = async () => {
   } catch (error) {
     console.error(error)
 
-    errorMessage.value =
-      'Não foi possível criar sua conta. Verifique os dados e tente novamente.'
+    $q.notify({
+      type: 'negative',
+      message: 'Não foi possível criar sua conta. Verifique os dados e tente novamente.',
+    })
   } finally {
     loading.value = false
   }

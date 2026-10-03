@@ -1,10 +1,25 @@
 <template>
   <q-page class="q-pa-lg wrapper">
-    <div class="text-h4 text-weight-bold">Dashboard</div>
+    <div class="row items-center justify-between">
+      <div>
+        <div class="text-h4 text-weight-bold">Dashboard</div>
 
-    <div class="text-subtitle1 q-mt-sm">
-      Olá, {{ authStore.user?.firstName ?? '' }}
-      {{ authStore.user?.lastName ?? '' }}!
+        <div class="text-subtitle1 q-mt-sm">
+          Olá, {{ authStore.user?.firstName ?? '' }}
+          {{ authStore.user?.lastName ?? '' }}!
+        </div>
+      </div>
+
+      <q-btn
+        flat
+        round
+        icon="mdi-refresh"
+        :loading="loading"
+        aria-label="Atualizar dashboard"
+        @click="fetchDashboard"
+      >
+        <q-tooltip>Atualizar</q-tooltip>
+      </q-btn>
     </div>
 
     <!-- Loading -->
@@ -19,19 +34,7 @@
       </div>
     </div>
 
-    <!-- Erro -->
-    <q-banner v-else-if="error" rounded class="bg-negative text-white q-mt-lg">
-      <template #avatar>
-        <q-icon name="mdi-alert-circle-outline" class="q-mr-sm" />
-        {{ error }}
-      </template>
-
-      <template #action>
-        <q-btn flat label="Tentar novamente" no-caps @click="fetchDashboard" />
-      </template>
-    </q-banner>
-
-    <template v-else>
+    <template v-else-if="dashboard">
       <!-- Indicadores -->
       <div class="row q-col-gutter-md q-mt-lg">
         <div class="col-12 col-sm-4">
@@ -110,15 +113,6 @@
               <div class="text-h6">Agendamentos de hoje</div>
             </div>
 
-            <q-btn
-              flat
-              round
-              icon="mdi-refresh"
-              :loading="loading"
-              @click="fetchDashboard"
-            >
-              <q-tooltip> Atualizar </q-tooltip>
-            </q-btn>
           </div>
         </q-card-section>
 
@@ -191,6 +185,7 @@
 </template>
 
 <script setup lang="ts">
+import { useQuasar } from 'quasar'
 import { roleLabel } from '@/utils/global'
 
 definePageMeta({
@@ -200,8 +195,18 @@ definePageMeta({
 })
 
 const authStore = useAuthStore()
+const $q = useQuasar()
 
 const { dashboard, loading, error, fetchDashboard } = useDashboard()
+
+watch(error, (message) => {
+  if (message) {
+    $q.notify({
+      type: 'negative',
+      message,
+    })
+  }
+})
 
 onMounted(fetchDashboard)
 </script>

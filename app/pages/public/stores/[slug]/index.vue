@@ -80,10 +80,11 @@
               <q-btn
                 v-if="store.phone"
                 color="primary"
+                :text-color="primaryTextColor"
                 outline
                 rounded
                 size="md"
-                icon="mdi-phone-outline"
+                icon="mdi-whatsapp"
                 label="Entrar em contato"
                 :href="phoneUrl"
                 no-caps
@@ -194,7 +195,7 @@
                   :text-color="primaryTextColor"
                   size="48px"
                 >
-                  <q-icon name="mdi-phone-outline" size="26px" />
+                  <q-icon name="mdi-whatsapp" size="26px" />
                 </q-avatar>
 
                 <div class="text-subtitle1 text-weight-bold q-mt-md">
@@ -211,7 +212,7 @@
                   dense
                   no-caps
                   color="primary"
-                  icon-right="mdi-phone"
+                  icon-right="mdi-whatsapp"
                   label="Entrar em contato"
                   :href="phoneUrl"
                 />
