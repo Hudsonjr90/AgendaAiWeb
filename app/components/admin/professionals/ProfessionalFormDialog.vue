@@ -138,6 +138,29 @@
               />
             </div>
             <div class="col-12">
+              <q-select
+                v-model="form.serviceIds"
+                outlined
+                dense
+                multiple
+                use-chips
+                emit-value
+                map-options
+                label="Serviços que realiza"
+                :options="serviceOptions"
+                :loading="loadingServices"
+                :disable="!form.storeId || loadingServices"
+                hint="Somente serviços ativos disponibilizados para a loja selecionada."
+              />
+              <div
+                v-if="form.storeId && !loadingServices && !serviceOptions.length"
+                class="text-caption text-grey-7 q-mt-sm"
+              >
+                Nenhum serviço ativo está disponível nesta loja. Primeiro
+                vincule serviços a ela na tela de Serviços.
+              </div>
+            </div>
+            <div class="col-12">
               <q-input
                 v-model="form.description"
                 outlined
@@ -180,7 +203,12 @@
 </template>
 
 <script setup lang="ts">
-import type { Professional, Store } from '~/types/api'
+import type {
+  Professional,
+  Service,
+  Store,
+  StoreServiceOption,
+} from '~/types/api'
 
 interface Props {
   modelValue: boolean
@@ -199,6 +227,7 @@ const $q = useQuasar()
 
 const { createProfessional, updateProfessional } = useProfessionals()
 const { stores, fetchStores } = useStores()
+const api = useApi()
 
 const { compress } = useImageCompression()
 const { upload: uploadCloudinary, loading: uploadingAvatar } =
@@ -222,9 +251,12 @@ const form = reactive({
   phone: '',
   description: '',
   avatarUrl: '',
+  serviceIds: [] as string[],
 })
 
 const isEditing = computed(() => !!props.professional)
+const availableServices = ref<Service[]>([])
+const loadingServices = ref(false)
 
 const status = ref<'ACTIVE' | 'INACTIVE'>('ACTIVE')
 
@@ -244,6 +276,28 @@ const storeOptions = computed(() =>
   })),
 )
 
+const serviceOptions = computed(() => {
+  const options = availableServices.value.map((service) => ({
+    label: service.name,
+    value: service.id,
+  }))
+  const availableIds = new Set(options.map(({ value }) => value))
+
+  for (const association of props.professional?.services ?? []) {
+    if (
+      form.serviceIds.includes(association.serviceId) &&
+      !availableIds.has(association.serviceId)
+    ) {
+      options.push({
+        label: `${association.service.name} (indisponível nesta loja)`,
+        value: association.serviceId,
+      })
+    }
+  }
+
+  return options
+})
+
 const resetForm = () => {
   avatarFile.value = null
 
@@ -254,6 +308,8 @@ const resetForm = () => {
   form.phone = ''
   form.description = ''
   form.avatarUrl = ''
+  form.serviceIds = []
+  availableServices.value = []
   status.value = 'ACTIVE'
 }
 
@@ -271,6 +327,8 @@ const populateForm = () => {
   form.phone = props.professional.phone ?? ''
   form.description = props.professional.description ?? ''
   form.avatarUrl = props.professional.avatarUrl ?? ''
+  form.serviceIds =
+    props.professional.services?.map(({ serviceId }) => serviceId) ?? []
 
   status.value = props.professional.status ?? 'ACTIVE'
 }
@@ -323,6 +381,46 @@ const removeAvatar = () => {
   avatarFile.value = null
 }
 
+let serviceRequest = 0
+const loadStoreServices = async (storeId: string) => {
+  const request = ++serviceRequest
+
+  if (!storeId) {
+    availableServices.value = []
+    loadingServices.value = false
+    return
+  }
+
+  availableServices.value = []
+  loadingServices.value = true
+
+  try {
+    const associations = await api<StoreServiceOption[]>(
+      `/stores/${encodeURIComponent(storeId)}/services`,
+    )
+
+    if (request === serviceRequest) {
+      availableServices.value = associations
+        .map(({ service }) => service)
+        .filter((service) => service.status === 'ACTIVE')
+    }
+  } catch (error) {
+    if (request === serviceRequest) {
+      $q.notify({
+        type: 'negative',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Não foi possível carregar os serviços desta loja.',
+      })
+    }
+  } finally {
+    if (request === serviceRequest) {
+      loadingServices.value = false
+    }
+  }
+}
+
 const handleSubmit = async () => {
   if (!form.firstName.trim()) {
     $q.notify({
@@ -357,19 +455,21 @@ const handleSubmit = async () => {
     if (isEditing.value && props.professional) {
       const updated = await updateProfessional(props.professional.id, {
         storeId: form.storeId,
+        serviceIds: form.serviceIds,
         firstName: form.firstName.trim(),
         lastName: form.lastName.trim(),
         email: form.email.trim() || undefined,
         phone: form.phone.trim() || undefined,
         description: form.description.trim() || undefined,
         avatarUrl: form.avatarUrl || undefined,
-        status: props.professional.status,
+        status: status.value,
       })
 
       emit('saved', updated)
     } else {
       const created = await createProfessional({
         storeId: form.storeId,
+        serviceIds: form.serviceIds,
         firstName: form.firstName.trim(),
         lastName: form.lastName.trim(),
         email: form.email.trim() || undefined,
@@ -414,6 +514,20 @@ watch(
   },
   {
     immediate: true,
+  },
+)
+
+watch(
+  () => form.storeId,
+  async (storeId, previousStoreId) => {
+    await loadStoreServices(storeId)
+
+    if (previousStoreId && previousStoreId !== storeId) {
+      const availableIds = new Set(
+        availableServices.value.map(({ id }) => id),
+      )
+      form.serviceIds = form.serviceIds.filter((id) => availableIds.has(id))
+    }
   },
 )
 

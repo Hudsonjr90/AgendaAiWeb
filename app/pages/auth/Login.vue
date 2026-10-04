@@ -110,6 +110,7 @@ const router = useRouter()
 const authStore = useAuthStore()
 const api = useApi()
 const $q = useQuasar()
+const organizationSetup = useOrganizationSetup()
 
 const email = ref('')
 const password = ref('')
@@ -137,6 +138,21 @@ const handleLogin = async () => {
     })
 
     authStore.setSession(response)
+
+    if (response.role === 'OWNER' || response.role === 'ADMIN') {
+      await organizationSetup.fetchProgress()
+
+      if (organizationSetup.error.value) {
+        $q.notify({
+          type: 'negative',
+          message:
+            'Não foi possível verificar a configuração inicial. Você pode continuar pelo painel e retomá-la depois.',
+        })
+      } else if (!organizationSetup.isComplete.value) {
+        await router.push('/admin/onboarding')
+        return
+      }
+    }
 
     await router.push('/admin/dashboard')
   } catch (error) {

@@ -187,15 +187,6 @@
             </template>
           </q-input>
 
-          <q-banner
-            v-if="errorMessage"
-            dense
-            rounded
-            class="bg-red-1 text-negative"
-          >
-            {{ errorMessage }}
-          </q-banner>
-
           <q-btn
             type="submit"
             color="primary"
@@ -225,7 +216,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useQuasar } from 'quasar'
 import { useCustomerAuthStore } from '~/stores/customer-auth'
+import { getErrorMessage } from '~/utils/global'
 
 definePageMeta({
   layout: 'public-store',
@@ -233,6 +226,7 @@ definePageMeta({
 
 const route = useRoute()
 const auth = useCustomerAuthStore()
+const $q = useQuasar()
 
 const slug = computed(() => String(route.params.slug ?? ''))
 
@@ -245,11 +239,8 @@ const password = ref('')
 const confirmPassword = ref('')
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
-const errorMessage = ref('')
 
 const submit = async () => {
-  errorMessage.value = ''
-
   const normalizedCpf = cpf.value.replace(/\D/g, '')
   const normalizedPhone = phone.value.trim()
 
@@ -263,12 +254,23 @@ const submit = async () => {
       ...(normalizedPhone ? { phone: normalizedPhone } : {}),
     })
 
-    await navigateTo(`/public/stores/${slug.value}/account`)
+    const storePath = `/public/stores/${encodeURIComponent(slug.value)}`
+    const redirect = route.query.redirect
+    const destination =
+      typeof redirect === 'string' &&
+      redirect.startsWith(`${storePath}/`)
+        ? redirect
+        : `${storePath}/account`
+
+    await navigateTo(destination)
   } catch (error) {
-    errorMessage.value =
-      error instanceof Error
-        ? error.message
-        : 'Não foi possível realizar o cadastro. Tente novamente.'
+    $q.notify({
+      type: 'negative',
+      message: getErrorMessage(
+        error,
+        'Não foi possível realizar o cadastro. Tente novamente.',
+      ),
+    })
   }
 }
 
@@ -279,8 +281,7 @@ useHead({
 
 <style scoped>
 .auth-page {
-  min-height: 70vh;
-  background: #f7f7fb;
+ margin-top: -10rem;
 }
 
 .auth-card {

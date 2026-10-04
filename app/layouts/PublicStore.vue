@@ -4,7 +4,7 @@
     <q-header bordered class="bg-white text-dark">
       <q-toolbar class="q-px-md q-px-lg-xl wrapper" style="min-height: 76px">
         <NuxtLink
-          :to="storePath"
+          :to="`${storePath}/home`"
           class="row items-center no-wrap text-dark"
           style="text-decoration: none"
           aria-label="Página inicial da loja"
@@ -261,11 +261,7 @@ const storePath = computed(() => `/public/stores/${encodeURIComponent(slug.value
 const loginPath = computed(() => `${storePath.value}/login`);
 const registerPath = computed(() => `${storePath.value}/register`);
 const accountPath = computed(() => `${storePath.value}/account`);
-
-const bookingLink = computed(() => ({
-  path: storePath.value,
-  hash: '#agendamento',
-}));
+const bookingLink = computed(() => `${storePath.value}/booking`)
 
 const navigation = computed(() => [
   {
@@ -280,16 +276,7 @@ const navigation = computed(() => [
     to: `${storePath.value}/professionals`,
     disabled: false,
   },
-  {
-    label: 'Localização',
-    icon: 'mdi-map-marker-outline',
-    to: {
-      path: storePath.value,
-      hash: '#informacoes',
-    },
-    disabled: false,
-  },
-]);
+])
 
 const { data: layoutStore } = await useAsyncData<PublicStoreResponse>(
   `public-store-layout-${slug.value}`,

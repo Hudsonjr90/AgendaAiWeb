@@ -7,7 +7,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   const loginPath = slug
     ? `/public/stores/${encodeURIComponent(slug)}/login`
-    : '/';
+    : '/customer/login';
 
   const redirectToLogin = () =>
     navigateTo({

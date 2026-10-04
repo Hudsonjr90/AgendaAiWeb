@@ -126,6 +126,23 @@
           </q-td>
         </template>
 
+        <template #body-cell-stores="props">
+          <q-td :props="props">
+            <q-chip
+              v-for="association in props.row.stores ?? []"
+              :key="association.storeId"
+              dense
+              color="grey-2"
+              text-color="dark"
+            >
+              {{ association.store?.name ?? storeName(association.storeId) }}
+            </q-chip>
+            <span v-if="!props.row.stores?.length" class="text-grey-7">
+              Nenhuma loja vinculada
+            </span>
+          </q-td>
+        </template>
+
         <template #body-cell-actions="props">
           <q-td :props="props" auto-width>
             <q-btn
@@ -232,6 +249,41 @@
                 />
               </div>
             </div>
+
+            <q-select
+              v-model="form.storeIds"
+              outlined
+              multiple
+              use-chips
+              emit-value
+              map-options
+              label="Lojas que oferecem este serviço *"
+              :options="storeOptions"
+              :loading="storesLoading"
+              :rules="[
+                (value) =>
+                  (Array.isArray(value) && value.length > 0) ||
+                  'Selecione pelo menos uma loja',
+              ]"
+              hint="O serviço só aparecerá no agendamento das lojas selecionadas."
+            />
+            <q-banner
+              v-if="!storesLoading && stores.length === 0"
+              dense
+              rounded
+              class="bg-orange-1 text-orange-10"
+            >
+              Cadastre uma loja antes de disponibilizar um serviço.
+              <template #action>
+                <q-btn
+                  flat
+                  no-caps
+                  color="primary"
+                  label="Gerenciar lojas"
+                  to="/admin/stores"
+                />
+              </template>
+            </q-banner>
           </q-card-section>
 
           <q-separator />
@@ -299,6 +351,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { getErrorMessage } from '~/utils/global'
+import type { Service, Store } from '~/types/api'
 
 definePageMeta({
   layout: 'admin',
@@ -306,27 +359,21 @@ definePageMeta({
   roles: ['OWNER', 'ADMIN', 'MANAGER'],
 })
 
-interface Service {
-  id: string
-  organizationId: string
-  name: string
-  description: string | null
-  durationMinutes: number
-  priceCents: number
-  status: 'ACTIVE' | 'INACTIVE'
-  createdAt?: string
-  updatedAt?: string
-}
-
 interface ServicePayload {
   name: string
   description?: string
   durationMinutes: number
   priceCents: number
+  storeIds: string[]
 }
 
 const api = useApi()
 const $q = useQuasar()
+const {
+  stores,
+  loading: storesLoading,
+  fetchStores,
+} = useStores()
 
 const services = ref<Service[]>([])
 const loading = ref(false)
@@ -344,6 +391,7 @@ const emptyForm = () => ({
   description: '',
   durationMinutes: 30,
   price: 0,
+  storeIds: [] as string[],
 })
 
 const form = reactive(emptyForm())
@@ -371,6 +419,12 @@ const columns = [
     sortable: true,
   },
   {
+    name: 'stores',
+    label: 'Lojas',
+    field: 'stores',
+    align: 'left' as const,
+  },
+  {
     name: 'status',
     label: 'Status',
     field: 'status',
@@ -395,6 +449,20 @@ const filteredServices = computed(() => {
       .includes(term),
   )
 })
+
+const storeOptions = computed(() =>
+  stores.value.map((store: Store) => ({
+    label:
+      store.status === 'ACTIVE'
+        ? store.name
+        : `${store.name} (inativa)`,
+    value: store.id,
+  })),
+)
+
+function storeName(storeId: string) {
+  return stores.value.find((store) => store.id === storeId)?.name ?? 'Loja'
+}
 
 const activeServices = computed(() =>
   services.value.filter((service) => service.status === 'ACTIVE').length,
@@ -454,6 +522,7 @@ function openEditDialog(service: Service) {
     description: service.description ?? '',
     durationMinutes: service.durationMinutes,
     price: service.priceCents / 100,
+    storeIds: service.stores?.map(({ storeId }) => storeId) ?? [],
   })
   formDialog.value = true
 }
@@ -466,6 +535,7 @@ async function saveService() {
     description: form.description.trim() || undefined,
     durationMinutes: Number(form.durationMinutes),
     priceCents: Math.round(Number(form.price) * 100),
+    storeIds: [...form.storeIds],
   }
 
   saving.value = true
@@ -528,5 +598,7 @@ async function deleteService() {
   }
 }
 
-onMounted(loadServices)
+onMounted(async () => {
+  await Promise.all([loadServices(), fetchStores()])
+})
 </script>

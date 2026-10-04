@@ -2,6 +2,7 @@ import type { Professional } from '~/types/api'
 
 export interface CreateProfessionalPayload {
   storeId: string
+  serviceIds?: string[]
   firstName: string
   lastName: string
   email?: string

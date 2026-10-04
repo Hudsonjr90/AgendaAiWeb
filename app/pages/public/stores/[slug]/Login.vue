@@ -71,15 +71,6 @@
             </template>
           </q-input>
 
-          <q-banner
-            v-if="errorMessage"
-            dense
-            rounded
-            class="bg-red-1 text-negative q-mb-md"
-          >
-            {{ errorMessage }}
-          </q-banner>
-
           <q-btn
             type="submit"
             color="primary"
@@ -94,15 +85,6 @@
       </q-card-section>
 
       <q-card-section v-else>
-        <q-banner
-          v-if="errorMessage"
-          dense
-          rounded
-          class="bg-red-1 text-negative q-mb-md"
-        >
-          {{ errorMessage }}
-        </q-banner>
-
         <q-list bordered separator class="store-list">
           <q-item
             v-for="store in auth.availableStores"
@@ -173,7 +155,7 @@
           color="grey-7"
           icon="mdi-arrow-left"
           label="Voltar para a loja"
-          :to="`/public/stores/${slug}`"
+          :to="`/public/stores/${slug}/home`"
         />
       </q-card-section>
     </q-card>
@@ -182,7 +164,9 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useQuasar } from 'quasar'
 import { useCustomerAuthStore } from '~/stores/customer-auth'
+import { getErrorMessage } from '~/utils/global'
 
 definePageMeta({
   layout: 'public-store',
@@ -190,6 +174,7 @@ definePageMeta({
 
 const route = useRoute()
 const auth = useCustomerAuthStore()
+const $q = useQuasar()
 
 const slug = computed(() => String(route.params.slug ?? ''))
 const needsStoreSelection = computed(
@@ -198,7 +183,6 @@ const needsStoreSelection = computed(
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
-const errorMessage = ref('')
 
 const getDestination = (storeSlug: string) => {
   const redirect = route.query.redirect
@@ -214,7 +198,6 @@ const getDestination = (storeSlug: string) => {
 }
 
 const submit = async () => {
-  errorMessage.value = ''
   auth.clearError()
 
   try {
@@ -229,30 +212,34 @@ const submit = async () => {
 
     await navigateTo(getDestination(destinationSlug))
   } catch (error) {
-    errorMessage.value =
-      error instanceof Error
-        ? error.message
-        : 'Não foi possível entrar. Verifique seus dados e tente novamente.'
+    $q.notify({
+      type: 'negative',
+      message: getErrorMessage(
+        error,
+        'Não foi possível entrar. Verifique seus dados e tente novamente.',
+      ),
+    })
   }
 }
 
 const chooseStore = async (publicSlug: string) => {
-  errorMessage.value = ''
   auth.clearError()
 
   try {
     await auth.selectStore(publicSlug)
     await navigateTo(getDestination(publicSlug))
   } catch (error) {
-    errorMessage.value =
-      error instanceof Error
-        ? error.message
-        : 'Não foi possível acessar este estabelecimento. Tente novamente.'
+    $q.notify({
+      type: 'negative',
+      message: getErrorMessage(
+        error,
+        'Não foi possível acessar este estabelecimento. Tente novamente.',
+      ),
+    })
   }
 }
 
 const backToLogin = () => {
-  errorMessage.value = ''
   auth.clearError()
 }
 
@@ -263,8 +250,7 @@ useHead({
 
 <style scoped>
 .auth-page {
-  min-height: 70vh;
-  background: #f7f7fb;
+  margin-top: -10rem;
 }
 
 .auth-card {

@@ -171,7 +171,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -180,12 +180,21 @@ const { isMobile } = useMobile()
 
 const rightDrawerOpen = ref(false)
 
-const menuItems = [
+const menuItems = computed(() => [
   {
     label: 'Dashboard',
     icon: 'mdi-view-dashboard-outline',
     to: '/admin/dashboard',
   },
+  ...(authStore.role === 'OWNER' || authStore.role === 'ADMIN'
+    ? [
+        {
+          label: 'Configuração inicial',
+          icon: 'mdi-clipboard-check-outline',
+          to: '/admin/onboarding',
+        },
+      ]
+    : []),
   {
     label: 'Empresa',
     icon: 'mdi-domain',
@@ -216,7 +225,7 @@ const menuItems = [
     icon: 'mdi-calendar-clock-outline',
     to: '/admin/appointments',
   },
-]
+])
 
 const toggleRightDrawer = () => {
   rightDrawerOpen.value = !rightDrawerOpen.value

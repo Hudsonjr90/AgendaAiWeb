@@ -128,6 +128,57 @@ export interface Professional {
   description: string | null
   avatarUrl: string | null
   status: 'ACTIVE' | 'INACTIVE'
+  services?: ProfessionalServiceLink[]
   createdAt: string
   updatedAt: string
+}
+
+export interface Service {
+  id: string
+  organizationId: string
+  name: string
+  description: string | null
+  durationMinutes: number
+  priceCents: number
+  status: 'ACTIVE' | 'INACTIVE'
+  stores?: ServiceStoreLink[]
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface ServiceStoreLink {
+  id: string
+  serviceId: string
+  storeId: string
+  store?: Store
+}
+
+export interface StoreServiceOption {
+  serviceId: string
+  service: Service
+}
+
+export interface ProfessionalServiceLink {
+  id: string
+  professionalId: string
+  serviceId: string
+  service: Service
+}
+
+export type DayOfWeek =
+  | 'SUNDAY'
+  | 'MONDAY'
+  | 'TUESDAY'
+  | 'WEDNESDAY'
+  | 'THURSDAY'
+  | 'FRIDAY'
+  | 'SATURDAY'
+
+export interface BusinessHour {
+  id: string
+  storeId: string
+  day: DayOfWeek
+  isOpen: boolean
+  opensAt: string | null
+  closesAt: string | null
 }
