@@ -41,7 +41,7 @@
             rounded
             no-caps
             icon="mdi-store-search-outline"
-            label="Encontrar estabelecimento"
+            label="Encontrar loja"
             href="/#buscar"
             class="q-ml-sm"
           />

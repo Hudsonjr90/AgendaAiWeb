@@ -25,7 +25,7 @@
               no-caps
               size="lg"
               icon="mdi-store-search-outline"
-              label="Encontrar estabelecimento"
+              label="Encontrar loja"
               href="#buscar"
             />
             <q-btn
@@ -36,26 +36,6 @@
               color="dark"
               label="Como funciona"
               href="#como-funciona"
-            />
-          </div>
-          <div class="row items-center q-gutter-md q-mt-md">
-            <q-btn
-              flat
-              dense
-              no-caps
-              color="dark"
-              label="Sou consumidor"
-              icon="mdi-account-outline"
-              to="/customer/login"
-            />
-            <q-btn
-              flat
-              dense
-              no-caps
-              color="dark"
-              label="Sou uma empresa"
-              icon="mdi-domain"
-              to="/auth/login"
             />
           </div>
         </div>
@@ -371,7 +351,7 @@
           no-caps
           size="lg"
           icon="mdi-store-search-outline"
-          label="Encontrar estabelecimento"
+          label="Encontrar loja"
           href="#buscar"
         />
       </div>
