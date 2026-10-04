@@ -8,7 +8,7 @@
         </div>
       </div>
 
-      <div class="col-12 col-sm-auto">
+      <!-- <div class="col-12 col-sm-auto">
         <q-btn
           color="primary"
           icon="mdi-account-plus-outline"
@@ -18,7 +18,7 @@
           class="full-width"
           @click="openCreateDialog"
         />
-      </div>
+      </div> -->
     </div>
 
     <div class="row q-col-gutter-md q-mb-md">

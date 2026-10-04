@@ -7,9 +7,11 @@
           <div class="text-overline text-primary text-weight-bold">
             Minha conta
           </div>
+
           <h1 class="text-h4 text-weight-bold q-my-sm">
-            Olá, {{ auth.customer?.firstName || 'cliente' }}!
+            Olá, {{ firstName }}!
           </h1>
+
           <p class="text-body2 text-grey-7 q-mb-none">
             Acompanhe seus dados e seus agendamentos.
           </p>
@@ -42,9 +44,14 @@
             <div class="text-h6 text-weight-bold">
               {{ fullName }}
             </div>
-            <div class="text-body2 text-grey-7">
-              {{ auth.customer?.email }}
+
+            <div
+              v-if="auth.customer?.email"
+              class="text-body2 text-grey-7"
+            >
+              {{ auth.customer.email }}
             </div>
+
             <div
               v-if="auth.customer?.phone"
               class="text-body2 text-grey-7"
@@ -55,8 +62,8 @@
 
           <div class="col-12 col-sm-auto">
             <q-badge
-              color="positive"
-              label="Conta ativa"
+              :color="auth.customer?.status === 'ACTIVE' ? 'positive' : 'grey'"
+              :label="auth.customer?.status === 'ACTIVE' ? 'Conta ativa' : 'Conta'"
               rounded
               class="q-px-md q-py-sm"
             />
@@ -71,10 +78,12 @@
               <div class="text-h6 text-weight-bold">
                 Meus agendamentos
               </div>
+
               <div class="text-body2 text-grey-7 q-mt-xs">
                 Em breve, você poderá consultar seus horários por aqui.
               </div>
             </div>
+
             <div class="col-auto">
               <q-icon
                 name="mdi-calendar-clock-outline"
@@ -85,18 +94,6 @@
           </div>
         </q-card-section>
       </q-card>
-
-      <div class="q-mt-lg">
-        <q-btn
-          color="primary"
-          unelevated
-          rounded
-          no-caps
-          icon="mdi-storefront-outline"
-          label="Voltar para a loja"
-          :to="`/public/stores/${slug}`"
-        />
-      </div>
     </div>
   </q-page>
 </template>
@@ -115,27 +112,48 @@ const auth = useCustomerAuthStore();
 
 const slug = computed(() => String(route.params.slug ?? ''));
 
+const storePath = computed(
+  () => `/public/stores/${encodeURIComponent(slug.value)}`,
+);
+
+const firstName = computed(
+  () => auth.customer?.firstName?.trim() || 'cliente',
+);
+
 const fullName = computed(() => {
   const customer = auth.customer;
 
-  return customer
-    ? `${customer.firstName} ${customer.lastName}`.trim()
-    : 'Cliente';
+  if (!customer) {
+    return 'Cliente';
+  }
+
+  const name = [customer.firstName, customer.lastName]
+    .filter((part): part is string => Boolean(part?.trim()))
+    .join(' ')
+    .trim();
+
+  return name || 'Cliente';
 });
 
 const initials = computed(() => {
-  const names = fullName.value.split(/\s+/).filter(Boolean);
+  const names = fullName.value
+    .split(/\s+/)
+    .filter(Boolean);
 
-  return names
-    .slice(0, 2)
-    .map((name) => name.charAt(0).toUpperCase())
-    .join('');
+  return (
+    names
+      .slice(0, 2)
+      .map((name) => name.charAt(0).toUpperCase())
+      .join('') || 'C'
+  );
 });
 
 const logout = async () => {
   auth.logout();
 
-  await navigateTo(`/public/stores/${slug.value}/login`);
+  await navigateTo({
+    path: `/public/stores/${encodeURIComponent(slug.value)}/login`,
+  });
 };
 
 useHead({
