@@ -205,6 +205,14 @@
           flat
           no-caps
           color="secondary"
+          label="Já é cliente? Ative seu cadastro"
+          icon-right="mdi-email-check-outline"
+          to="/customer/login?mode=first-access"
+        />
+        <q-btn
+          flat
+          no-caps
+          color="secondary"
           label="Já possui uma conta? Entre"
           icon-right="mdi-login"
           :to="`/public/stores/${slug}/login`"
