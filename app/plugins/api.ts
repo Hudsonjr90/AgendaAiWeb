@@ -8,11 +8,16 @@ export default defineNuxtPlugin(() => {
     baseURL: config.public.apiBaseUrl,
 
     onRequest({ options }) {
-      if (!authStore.accessToken) {
+      const headers = new Headers(options.headers)
+
+      if (headers.has('Authorization')) {
+        options.headers = headers
         return
       }
 
-      const headers = new Headers(options.headers)
+      if (!authStore.accessToken) {
+        return
+      }
 
       headers.set(
         'Authorization',
@@ -22,8 +27,11 @@ export default defineNuxtPlugin(() => {
       options.headers = headers
     },
 
-    async onResponseError({ response }) {
-      if (response.status !== 401) {
+    async onResponseError({ response, options }) {
+      if (
+        response.status !== 401 ||
+        new Headers(options.headers).has('Authorization')
+      ) {
         return
       }
 

@@ -25,6 +25,95 @@
     </q-inner-loading>
 
     <div v-if="!loadingTheme" class="row q-col-gutter-lg">
+      <div class="col-12">
+        <q-card flat bordered>
+          <q-card-section>
+            <div class="row items-center justify-between">
+              <div>
+                <div class="text-h6">Imagens da vitrine</div>
+                <div class="text-body2 text-grey-7 q-mt-xs">
+                  Adicione até cinco imagens para o carrossel da página inicial
+                  da loja.
+                </div>
+              </div>
+              <q-chip color="primary" text-color="white">
+                {{ themeForm.bannerImages.length }} / 5
+              </q-chip>
+            </div>
+          </q-card-section>
+
+          <q-separator />
+
+          <q-card-section>
+            <div v-if="themeForm.bannerImages.length" class="row q-col-gutter-md">
+              <div
+                v-for="(image, index) in themeForm.bannerImages"
+                :key="`${image}-${index}`"
+                class="col-12 col-sm-6 col-md-4 col-lg-3"
+              >
+                <q-card flat bordered>
+                  <q-img :src="image" ratio="16/9">
+                    <div class="absolute-top-right q-pa-xs">
+                      <q-btn
+                        round
+                        dense
+                        size="sm"
+                        color="negative"
+                        icon="mdi-delete-outline"
+                        aria-label="Remover imagem"
+                        :disable="savingBanners || uploadingBanner"
+                        @click="removeBannerImage(index)"
+                      />
+                    </div>
+                  </q-img>
+                  <q-card-section class="q-pa-sm text-caption text-grey-7">
+                    Imagem {{ index + 1 }}
+                  </q-card-section>
+                </q-card>
+              </div>
+            </div>
+            <div v-else class="text-body2 text-grey-7 q-mb-md">
+              Nenhuma imagem de vitrine cadastrada.
+            </div>
+
+            <div class="row items-center q-col-gutter-md q-mt-sm">
+              <div class="col-12 col-md-8">
+                <q-file
+                  v-model="bannerFile"
+                  outlined
+                  clearable
+                  accept=".jpg,.jpeg,.png,.webp"
+                  max-file-size="5242880"
+                  label="Adicionar imagem"
+                  hint="JPG, JPEG, PNG ou WEBP. Máximo de 5 MB por imagem."
+                  :loading="uploadingBanner"
+                  :disable="uploadingBanner || savingBanners || themeForm.bannerImages.length >= 5"
+                  @update:model-value="handleBannerSelected"
+                  @rejected="handleFileRejected"
+                >
+                  <template #prepend>
+                    <q-icon name="mdi-image-plus-outline" />
+                  </template>
+                </q-file>
+              </div>
+              <div class="col-12 col-md-4">
+                <q-btn
+                  class="full-width"
+                  color="primary"
+                  unelevated
+                  no-caps
+                  icon="mdi-content-save-outline"
+                  label="Salvar imagens"
+                  :loading="savingBanners"
+                  :disable="uploadingBanner"
+                  @click="saveBannerImages"
+                />
+              </div>
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
+
       <div class="col-12 col-md-4">
         <q-card flat bordered>
           <q-card-section>
@@ -365,7 +454,7 @@ import type {
 definePageMeta({
   layout: 'admin',
   middleware: ['auth', 'role'],
-  roles: ['OWNER', 'ADMIN', 'MANAGER'],
+  roles: ['OWNER', 'ADMIN'],
 })
 
 const route = useRoute()
@@ -386,8 +475,11 @@ const {
 const loadingTheme = computed(() => themeLoading.value)
 
 const logoFile = ref<File | null>(null)
+const bannerFile = ref<File | null>(null)
 const uploading = ref(false)
+const uploadingBanner = ref(false)
 const saving = ref(false)
+const savingBanners = ref(false)
 const customizing = ref(false)
 
 const currentTheme = ref<StoreTheme | null>(null)
@@ -396,6 +488,7 @@ const editSnapshot = ref<StoreBrandTheme | null>(null)
 
 const defaults: StoreBrandTheme = {
   logoUrl: null,
+  bannerImages: [],
   primaryColor: '#642AFB',
   secondaryColor: '#FFC107',
   accentColor: '#FF4081',
@@ -456,6 +549,7 @@ const loadTheme = async () => {
 
     Object.assign(themeForm, {
       logoUrl: theme.logoUrl ?? null,
+      bannerImages: theme.bannerImages ?? [],
       primaryColor: theme.primaryColor,
       secondaryColor: theme.secondaryColor,
       accentColor: theme.accentColor,
@@ -469,6 +563,67 @@ const loadTheme = async () => {
         'Não foi possível carregar a identidade visual.',
       ),
     })
+  }
+}
+
+const handleBannerSelected = async (file: File | null) => {
+  if (!file) return
+
+  if (themeForm.bannerImages.length >= 5) {
+    $q.notify({
+      type: 'warning',
+      message: 'A vitrine aceita no máximo cinco imagens.',
+    })
+    bannerFile.value = null
+    return
+  }
+
+  uploadingBanner.value = true
+
+  try {
+    const result = await upload(file, 'store')
+    themeForm.bannerImages.push(result.secureUrl)
+  } catch (error) {
+    console.error(error)
+    $q.notify({
+      type: 'negative',
+      message: getErrorMessage(error, 'Não foi possível enviar a imagem.'),
+    })
+  } finally {
+    uploadingBanner.value = false
+    bannerFile.value = null
+  }
+}
+
+const removeBannerImage = (index: number) => {
+  themeForm.bannerImages.splice(index, 1)
+}
+
+const saveBannerImages = async () => {
+  savingBanners.value = true
+
+  try {
+    const theme = await saveTheme(storeId.value, {
+      bannerImages: [...themeForm.bannerImages],
+    })
+    currentTheme.value = theme
+    themeForm.bannerImages = theme.bannerImages ?? []
+
+    $q.notify({
+      type: 'positive',
+      message: 'Imagens da vitrine salvas com sucesso.',
+    })
+  } catch (error) {
+    console.error(error)
+    $q.notify({
+      type: 'negative',
+      message: getErrorMessage(
+        error,
+        'Não foi possível salvar as imagens da vitrine.',
+      ),
+    })
+  } finally {
+    savingBanners.value = false
   }
 }
 
@@ -536,6 +691,7 @@ const saveCustomTheme = async () => {
   try {
     const payload: StoreBrandTheme = {
       logoUrl: themeForm.logoUrl,
+      bannerImages: [...themeForm.bannerImages],
       primaryColor: themeForm.primaryColor,
       secondaryColor: themeForm.secondaryColor,
       accentColor: themeForm.accentColor,
@@ -549,6 +705,7 @@ const saveCustomTheme = async () => {
     currentTheme.value = theme
     Object.assign(themeForm, {
       logoUrl: theme.logoUrl ?? null,
+      bannerImages: theme.bannerImages ?? [],
       primaryColor: theme.primaryColor,
       secondaryColor: theme.secondaryColor,
       accentColor: theme.accentColor,
@@ -583,6 +740,7 @@ const cancelCustomization = () => {
   } else if (currentTheme.value) {
     Object.assign(themeForm, {
       logoUrl: currentTheme.value.logoUrl ?? null,
+      bannerImages: currentTheme.value.bannerImages ?? [],
       primaryColor: currentTheme.value.primaryColor,
       secondaryColor: currentTheme.value.secondaryColor,
       accentColor: currentTheme.value.accentColor,

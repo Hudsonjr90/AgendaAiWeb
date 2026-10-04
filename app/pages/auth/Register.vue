@@ -208,7 +208,7 @@
 
 <script setup lang="ts">
 import { useQuasar } from 'quasar'
-import type { RegisterResponse } from '~/types/api'
+import type { LoginResponse, RegisterResponse } from '~/types/api'
 
 definePageMeta({
   layout: 'auth',
@@ -217,6 +217,7 @@ definePageMeta({
 const router = useRouter()
 const api = useApi()
 const $q = useQuasar()
+const authStore = useAuthStore()
 
 const firstName = ref('')
 const lastName = ref('')
@@ -242,7 +243,7 @@ const handleRegister = async () => {
   loading.value = true
 
   try {
-    const response = await api<RegisterResponse>('/auth/register', {
+    await api<RegisterResponse>('/auth/register', {
       method: 'POST',
       body: {
         firstName: firstName.value,
@@ -258,9 +259,30 @@ const handleRegister = async () => {
       },
     })
 
-    console.log('Conta criada:', response)
+    try {
+      const loginResponse = await api<LoginResponse>('/auth/login', {
+        method: 'POST',
+        body: {
+          email: email.value,
+          password: password.value,
+        },
+      })
 
-    await router.push('/auth/login')
+      authStore.setSession(loginResponse)
+      $q.notify({
+        type: 'positive',
+        message: 'Conta criada. Vamos preparar sua organização.',
+      })
+      await router.push('/admin/onboarding')
+    } catch (error) {
+      console.error(error)
+      $q.notify({
+        type: 'warning',
+        message:
+          'Sua conta foi criada, mas não foi possível iniciar a sessão. Entre para continuar a configuração.',
+      })
+      await router.push('/auth/login')
+    }
   } catch (error) {
     console.error(error)
 

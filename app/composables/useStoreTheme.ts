@@ -5,6 +5,7 @@ export interface StoreTheme {
   id?: string
   storeId?: string
   logoUrl?: string | null
+  bannerImages?: string[]
   primaryColor: string
   secondaryColor: string
   accentColor: string
@@ -19,6 +20,7 @@ export interface StoreTheme {
 
 export interface StoreBrandTheme {
   logoUrl: string | null
+  bannerImages: string[]
   primaryColor: string
   secondaryColor: string
   accentColor: string

@@ -92,6 +92,68 @@
         </div>
       </div>
 
+      <q-card
+        v-if="
+          setupLoaded &&
+          !setupComplete &&
+          ['OWNER', 'ADMIN'].includes(authStore.role ?? '')
+        "
+        flat
+        bordered
+        class="q-mt-lg full-width"
+      >
+        <q-card-section class="row items-center q-col-gutter-md">
+          <div class="col">
+            <div class="text-h6 text-weight-bold">
+              Termine a configuração da sua organização
+            </div>
+            <div class="text-body2 text-grey-7 q-mt-xs">
+              {{ setupCompletedCount }} de {{ setupSteps.length }} etapas
+              concluídas. Você pode continuar agora ou voltar a este checklist
+              depois.
+            </div>
+          </div>
+          <div class="col-12 col-sm-auto">
+            <q-btn
+              flat
+              round
+              icon="mdi-refresh"
+              aria-label="Atualizar configuração"
+              :loading="setupLoading"
+              @click="fetchSetupProgress"
+            />
+            <q-btn
+              color="primary"
+              unelevated
+              no-caps
+              label="Continuar configuração"
+              to="/admin/onboarding"
+            />
+          </div>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-list separator>
+          <q-item v-for="setupStep in setupSteps" :key="setupStep.key">
+            <q-item-section avatar>
+              <q-icon
+                :name="
+                  setupStep.completed
+                    ? 'mdi-check-circle'
+                    : 'mdi-circle-outline'
+                "
+                :color="setupStep.completed ? 'positive' : 'grey-6'"
+              />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{ setupStep.title }}</q-item-label>
+              <q-item-label caption>{{ setupStep.detail }}</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card>
+
       <!-- Organização 
       <q-card flat bordered class="q-mt-lg">
         <q-card-section>
@@ -198,6 +260,15 @@ const authStore = useAuthStore()
 const $q = useQuasar()
 
 const { dashboard, loading, error, fetchDashboard } = useDashboard()
+const {
+  steps: setupSteps,
+  completedCount: setupCompletedCount,
+  isComplete: setupComplete,
+  loaded: setupLoaded,
+  loading: setupLoading,
+  error: setupError,
+  fetchProgress: fetchSetupProgress,
+} = useOrganizationSetup()
 
 watch(error, (message) => {
   if (message) {
@@ -208,5 +279,16 @@ watch(error, (message) => {
   }
 })
 
-onMounted(fetchDashboard)
+watch(setupError, (message) => {
+  if (message) {
+    $q.notify({
+      type: 'negative',
+      message,
+    })
+  }
+})
+
+onMounted(async () => {
+  await Promise.all([fetchDashboard(), fetchSetupProgress()])
+})
 </script>

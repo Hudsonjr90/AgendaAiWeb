@@ -285,16 +285,6 @@
             />
 
             <q-select
-              v-model="form.professionalId"
-              outlined
-              emit-value
-              map-options
-              label="Profissional"
-              :options="availableProfessionalOptions"
-              :rules="[(value) => !!value || 'Selecione um profissional']"
-            />
-
-            <q-select
               v-model="form.serviceId"
               outlined
               emit-value
@@ -302,6 +292,19 @@
               label="Serviço"
               :options="availableServiceOptions"
               :rules="[(value) => !!value || 'Selecione um serviço']"
+              :disable="!form.storeId || !availableServiceOptions.length"
+              @update:model-value="onServiceChange"
+            />
+
+            <q-select
+              v-model="form.professionalId"
+              outlined
+              emit-value
+              map-options
+              label="Profissional"
+              :options="availableProfessionalOptions"
+              :rules="[(value) => !!value || 'Selecione um profissional']"
+              :disable="!form.serviceId || !availableProfessionalOptions.length"
             />
 
             <q-input
@@ -559,6 +562,7 @@ interface Professional {
   firstName: string | null
   lastName: string | null
   status: string
+  services?: { serviceId: string }[]
 }
 
 interface Service {
@@ -567,6 +571,7 @@ interface Service {
   durationMinutes: number
   priceCents: number
   status: string
+  stores?: { storeId: string }[]
 }
 
 interface Appointment {
@@ -701,7 +706,11 @@ const availableProfessionals = computed(() =>
   professionals.value.filter(
     (professional) =>
       professional.status === 'ACTIVE' &&
-      (!form.storeId || professional.storeId === form.storeId),
+      (!form.storeId || professional.storeId === form.storeId) &&
+      (!form.serviceId ||
+        professional.services?.some(
+          ({ serviceId }) => serviceId === form.serviceId,
+        )),
   ),
 )
 
@@ -713,7 +722,12 @@ const availableProfessionalOptions = computed(() =>
 )
 
 const availableServices = computed(() =>
-  services.value.filter((service) => service.status === 'ACTIVE'),
+  services.value.filter(
+    (service) =>
+      service.status === 'ACTIVE' &&
+      !!form.storeId &&
+      service.stores?.some(({ storeId }) => storeId === form.storeId),
+  ),
 )
 
 const availableServiceOptions = computed(() =>
@@ -967,6 +981,24 @@ function openCancelDialog(appointment: Appointment) {
 }
 
 function onStoreChange() {
+  if (
+    form.serviceId &&
+    !availableServices.value.some((service) => service.id === form.serviceId)
+  ) {
+    form.serviceId = ''
+  }
+
+  if (
+    form.professionalId &&
+    !availableProfessionals.value.some(
+      (professional) => professional.id === form.professionalId,
+    )
+  ) {
+    form.professionalId = ''
+  }
+}
+
+function onServiceChange() {
   if (
     form.professionalId &&
     !availableProfessionals.value.some(
