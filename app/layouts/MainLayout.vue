@@ -54,46 +54,63 @@
           dense
           icon="mdi-menu"
           aria-label="Abrir menu principal"
-        >
-          <q-menu>
-            <q-list style="min-width: 220px">
-              <q-item clickable v-close-popup tag="a" href="/#como-funciona">
-                <q-item-section avatar>
-                  <q-icon name="mdi-list-box-outline" />
-                </q-item-section>
-                <q-item-section>Como funciona</q-item-section>
-              </q-item>
-              <q-item clickable v-close-popup tag="a" href="/#beneficios">
-                <q-item-section avatar>
-                  <q-icon name="mdi-star-outline" />
-                </q-item-section>
-                <q-item-section>Benefícios</q-item-section>
-              </q-item>
-              <q-separator />
-              <q-item clickable v-close-popup tag="a" href="/#buscar">
-                <q-item-section avatar>
-                  <q-icon name="mdi-store-search-outline" />
-                </q-item-section>
-                <q-item-section>Encontrar Loja</q-item-section>
-              </q-item>
-              <q-separator />
-              <q-item clickable v-close-popup to="/customer/login">
-                <q-item-section avatar>
-                  <q-icon name="mdi-account-outline" />
-                </q-item-section>
-                <q-item-section>Cliente</q-item-section>
-              </q-item>
-              <q-item clickable v-close-popup to="/auth/login">
-                <q-item-section avatar>
-                  <q-icon name="mdi-domain" />
-                </q-item-section>
-                <q-item-section>Empresa</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-btn>
+          @click="mobileMenuOpen = true"
+        />
       </q-toolbar>
     </q-header>
+
+    <q-drawer
+      v-model="mobileMenuOpen"
+      side="right"
+      overlay
+      bordered
+      :width="280"
+      class="bg-white"
+    >
+      <div class="row items-center justify-between q-pa-md">
+        <div class="text-subtitle1 text-weight-bold">Menu</div>
+        <q-btn
+          flat
+          round
+          dense
+          icon="mdi-close"
+          aria-label="Fechar menu"
+          @click="mobileMenuOpen = false"
+        />
+      </div>
+
+      <q-separator />
+
+      <q-list padding>
+        <q-item
+          clickable
+          tag="a"
+          href="/#buscar"
+          @click="mobileMenuOpen = false"
+        >
+          <q-item-section avatar>
+            <q-icon name="mdi-store-search-outline" />
+          </q-item-section>
+          <q-item-section>Encontrar Loja</q-item-section>
+        </q-item>
+
+        <q-separator spaced />
+
+        <q-item clickable to="/customer/login" @click="mobileMenuOpen = false">
+          <q-item-section avatar>
+            <q-icon name="mdi-account-outline" />
+          </q-item-section>
+          <q-item-section>Cliente</q-item-section>
+        </q-item>
+
+        <q-item clickable to="/auth/login" @click="mobileMenuOpen = false">
+          <q-item-section avatar>
+            <q-icon name="mdi-domain" />
+          </q-item-section>
+          <q-item-section>Empresa</q-item-section>
+        </q-item>
+      </q-list>
+    </q-drawer>
 
     <q-page-container>
       <slot />
@@ -106,20 +123,6 @@
   </q-layout>
 </template>
 <script setup lang="ts">
+const mobileMenuOpen = ref(false)
 </script>
 
-<style scoped>
-.global-footer {
-  border-top: 1px solid #eee8df;
-  background: #fff;
-  color: #272321;
-}
-
-@media (max-width: 599px) {
-  .global-footer nav {
-    width: 100%;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-}
-</style>
