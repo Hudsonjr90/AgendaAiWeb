@@ -154,6 +154,7 @@
 
               <q-item-section side top>
                 <q-badge
+                  class="q-py-sm"
                   rounded
                   :color="appointmentStatusColor(appointment.status)"
                   :label="appointmentStatusLabel(appointment.status)"

@@ -121,7 +121,7 @@
                   rounded
                   clearable
                   maxlength="100"
-                  label="Nome do estabelecimento"
+                  label="Nome da loja"
                   placeholder="Ex.: Barbearia Central"
                   hint="Também é possível pesquisar pelo identificador público."
                   :disable="loading"
@@ -331,6 +331,83 @@
       </div>
     </section>
 
+    <section
+      id="para-empresas"
+      class="business-section q-px-md q-px-lg-xl"
+    >
+      <div class="wrapper">
+        <div class="business-panel">
+          <div class="row items-end justify-between q-col-gutter-lg">
+            <div class="col-12 col-lg-7">
+              <div class="text-overline text-orange-3 text-weight-bold">
+                Para empresas
+              </div>
+              <h2 class="text-h4 text-weight-bold q-mt-xs q-mb-sm">
+                Sua operação organizada. Sua agenda pronta para crescer.
+              </h2>
+            </div>
+            <p class="col-12 col-lg-5 text-body1 business-intro q-mb-sm">
+              Gerencie o dia a dia do seu estabelecimento em um painel e
+              ofereça aos clientes uma forma simples de conhecer seus serviços
+              e solicitar horários.
+            </p>
+          </div>
+
+          <div class="row q-col-gutter-md q-mt-md">
+            <div
+              v-for="feature in businessFeatures"
+              :key="feature.title"
+              class="col-12 col-sm-6 col-lg-3"
+            >
+              <q-card flat class="business-card full-height">
+                <q-card-section>
+                  <q-avatar
+                    color="white"
+                    text-color="primary"
+                    size="52px"
+                  >
+                    <q-icon :name="feature.icon" size="26px" />
+                  </q-avatar>
+                  <div class="text-h6 text-weight-bold q-mt-md">
+                    {{ feature.title }}
+                  </div>
+                  <div class="text-body2 business-card-description q-mt-sm">
+                    {{ feature.description }}
+                  </div>
+                </q-card-section>
+              </q-card>
+            </div>
+          </div>
+
+          <div class="row items-center justify-between q-gutter-md q-mt-lg">
+            <div class="text-body2 business-footnote">
+              Você pode começar a configuração e continuar depois pelo painel.
+            </div>
+            <div class="row items-center q-gutter-sm">
+              <q-btn
+                flat
+                rounded
+                no-caps
+                color="white"
+                label="Já tenho uma conta"
+                to="/auth/login"
+              />
+              <q-btn
+                color="white"
+                text-color="primary"
+                unelevated
+                rounded
+                no-caps
+                icon="mdi-domain"
+                label="Criar conta da empresa"
+                to="/auth/register"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="closing-section q-px-md q-px-lg-xl">
       <div class="closing-card wrapper text-center">
         <q-avatar color="white" text-color="primary" size="64px">
@@ -428,6 +505,33 @@ const benefits = [
     title: 'Acompanhe sua solicitação',
     description:
       'Consulte os detalhes e o status dos seus agendamentos na conta do estabelecimento.',
+  },
+]
+
+const businessFeatures = [
+  {
+    icon: 'mdi-store-cog-outline',
+    title: 'Configure seu estabelecimento',
+    description:
+      'Cadastre uma ou mais lojas, seus dados e a identidade visual da página pública.',
+  },
+  {
+    icon: 'mdi-account-group-outline',
+    title: 'Organize equipe e serviços',
+    description:
+      'Cadastre profissionais, defina os serviços oferecidos e associe cada profissional ao que realiza.',
+  },
+  {
+    icon: 'mdi-calendar-clock-outline',
+    title: 'Defina a disponibilidade',
+    description:
+      'Configure os horários de atendimento de cada loja para orientar os pedidos de agendamento.',
+  },
+  {
+    icon: 'mdi-view-dashboard-outline',
+    title: 'Acompanhe sua operação',
+    description:
+      'Consulte agendamentos, clientes e indicadores no painel administrativo.',
   },
 ]
 
@@ -627,6 +731,40 @@ useHead({
   padding: 20px 12px;
 }
 
+.business-section {
+  padding-top: 88px;
+  padding-bottom: 88px;
+  scroll-margin-top: 80px;
+}
+
+.business-panel {
+  padding: clamp(28px, 5vw, 56px);
+  border-radius: 24px;
+  color: white;
+  background: linear-gradient(135deg, #77736e 0%, #8140d6 100%);
+}
+
+.business-panel h2 {
+  max-width: 680px;
+}
+
+.business-intro,
+.business-footnote {
+  color: rgb(255 255 255 / 78%);
+  line-height: 1.65;
+}
+
+.business-card {
+  border-radius: 16px;
+  color: #272321;
+  background: #fffdfa;
+}
+
+.business-card-description {
+  color: #6f6861;
+  line-height: 1.6;
+}
+
 .closing-section {
   padding-top: 88px;
   padding-bottom: 88px;
@@ -700,6 +838,7 @@ useHead({
   }
 
   .steps-section,
+  .business-section,
   .closing-section {
     padding-top: 64px;
     padding-bottom: 64px;
