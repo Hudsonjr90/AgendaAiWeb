@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header bordered class="bg-white text-dark">
+    <q-header bordered class="bg-primary text-white">
       <q-toolbar class="wrapper">
         <NuxtLink
           to="/"
@@ -15,7 +15,7 @@
             height="44px"
             fit="contain"
           />
-          <span class="text-h6 text-weight-bold q-ml-sm">AgendaAi</span>
+          <span class="text-h6 text-weight-bold text-white q-ml-sm">AgendaAi</span>
         </NuxtLink>
 
         <q-space />
@@ -36,14 +36,13 @@
             to="/auth/login"
           />
           <q-btn
-            color="primary"
             unelevated
             rounded
             no-caps
             icon="mdi-store-search-outline"
             label="Encontrar loja"
             href="/#buscar"
-            class="q-ml-sm"
+            class="q-ml-sm bg-white text-primary"
           />
         </div>
 
