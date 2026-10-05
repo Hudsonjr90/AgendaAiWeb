@@ -222,7 +222,7 @@
               round
               dense
               color="negative"
-              icon="mdi-delete-outline"
+              icon="mdi-calendar-remove-outline"
               aria-label="Cancelar agendamento"
               :disable="
                 ['CANCELLED', 'COMPLETED', 'NO_SHOW'].includes(props.row.status)
@@ -409,6 +409,7 @@
               :label="appointmentStatusLabel(selectedAppointment.status)"
             />
             <q-badge
+              v-if="selectedAppointment.paymentStatus === 'PAID'"
               outline
               :color="paymentStatusColor(selectedAppointment.paymentStatus)"
               :label="paymentStatusLabel(selectedAppointment.paymentStatus)"
@@ -469,7 +470,7 @@
     <q-dialog v-model="cancelDialog" persistent>
       <q-card style="width: 420px; max-width: 95vw">
         <q-card-section class="row items-center q-gutter-sm">
-          <q-icon name="event_busy" color="negative" size="md" />
+          <q-icon name="mdi-calendar-remove-outline" color="negative" size="md" />
           <div class="text-h6">Cancelar agendamento</div>
         </q-card-section>
 
@@ -497,12 +498,14 @@
             v-close-popup
             flat
             label="Voltar"
+            no-caps
             color="grey-7"
             :disable="cancelling"
           />
           <q-btn
             color="negative"
             unelevated
+            no-caps
             label="Confirmar cancelamento"
             :loading="cancelling"
             @click="cancelAppointment"
