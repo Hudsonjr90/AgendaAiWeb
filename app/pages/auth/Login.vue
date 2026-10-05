@@ -14,15 +14,12 @@
       />
 
       <div class="text-subtitle2 text-grey-7">
-        Acesse sua conta
+        Acesse sua conta ou crie uma nova para sua empresa.
       </div>
     </q-card-section>
 
     <q-card-section class="q-pt-none">
-      <q-form
-        class="full-width"
-        @submit.prevent="handleLogin"
-      >
+      <q-form class="full-width" @submit.prevent="handleLogin">
         <q-input
           v-model="email"
           outlined
@@ -54,8 +51,7 @@
           :rules="[
             (value) => !!value || 'Informe sua senha.',
             (value) =>
-              value.length >= 6 ||
-              'A senha deve ter pelo menos 6 caracteres.',
+              value.length >= 6 || 'A senha deve ter pelo menos 6 caracteres.',
           ]"
         >
           <template #prepend>
@@ -92,6 +88,17 @@
         label="Não tem uma conta? Crie a sua"
         icon-right="mdi-account-plus-outline"
         to="/auth/register"
+      />
+
+      <q-btn
+        flat
+        dense
+        no-caps
+        color="grey-7"
+        icon="mdi-arrow-left"
+        label="Voltar ao AgendaAi"
+        to="/"
+        class="q-mt-xs"
       />
     </q-card-section>
   </q-card>
