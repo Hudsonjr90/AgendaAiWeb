@@ -22,6 +22,18 @@
       </q-btn>
     </div>
 
+    <q-card flat bordered class="q-mt-lg">
+      <q-card-section>
+        <div class="text-h6">
+          {{ authStore.organization?.name }}
+        </div>
+
+        <div class="text-body2 text-grey-7 q-mt-xs">
+          Perfil: {{ roleLabel(authStore.role) }}
+        </div>
+      </q-card-section>
+    </q-card>
+
     <!-- Loading -->
     <div v-if="loading" class="row q-col-gutter-md q-mt-lg">
       <div v-for="item in 3" :key="item" class="col-12 col-sm-4">
@@ -48,7 +60,7 @@
                 <div class="text-body2 text-grey-7">Agendamentos hoje</div>
 
                 <div class="text-h4 text-weight-bold">
-                  {{ dashboard?.summary.appointmentsToday ?? 0 }}
+                  {{ confirmedTodayAppointments.length }}
                 </div>
               </div>
             </q-card-section>
@@ -154,19 +166,6 @@
         </q-list>
       </q-card>
 
-      <!-- Organização 
-      <q-card flat bordered class="q-mt-lg">
-        <q-card-section>
-          <div class="text-h6">
-            {{ authStore.organization?.name }}
-          </div>
-
-          <div class="text-body2 text-grey-7 q-mt-xs">
-            Perfil: {{ roleLabel(authStore.role) }}
-          </div>
-        </q-card-section>
-      </q-card> -->
-
       <!-- Agendamentos -->
       <q-card flat bordered class="q-mt-lg">
         <q-card-section>
@@ -174,7 +173,6 @@
             <div>
               <div class="text-h6">Agendamentos de hoje</div>
             </div>
-
           </div>
         </q-card-section>
 
@@ -182,7 +180,7 @@
 
         <!-- Estado vazio -->
         <q-card-section
-          v-if="!dashboard?.todayAppointments.length"
+          v-if="!confirmedTodayAppointments.length"
           class="column items-center justify-center q-py-xl"
         >
           <q-icon
@@ -191,7 +189,9 @@
             color="grey-5"
           />
 
-          <div class="text-h6 q-mt-md">Nenhum agendamento para hoje</div>
+          <div class="text-h6 q-mt-md">
+            Nenhum agendamento confirmado para hoje
+          </div>
 
           <div class="text-body2 text-grey-7 q-mt-xs">
             Os agendamentos realizados aparecerão aqui.
@@ -201,7 +201,7 @@
         <!-- Lista -->
         <q-list v-else separator>
           <q-item
-            v-for="appointment in dashboard.todayAppointments"
+            v-for="appointment in confirmedTodayAppointments"
             :key="appointment.id"
             class="q-py-md"
           >
@@ -260,6 +260,13 @@ const authStore = useAuthStore()
 const $q = useQuasar()
 
 const { dashboard, loading, error, fetchDashboard } = useDashboard()
+const confirmedTodayAppointments = computed(
+  () =>
+    dashboard.value?.todayAppointments.filter(
+      (appointment) => appointment.status === 'CONFIRMED',
+    ) ?? [],
+)
+
 const {
   steps: setupSteps,
   completedCount: setupCompletedCount,

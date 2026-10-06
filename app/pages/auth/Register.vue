@@ -27,36 +27,93 @@
         <div class="row q-col-gutter-sm">
           <div class="col-6">
             <q-input
-              v-model="firstName"
-              outlined
-              dense
+              v-model.trim="firstName"
               label="Nome"
               autocomplete="given-name"
-              :disable="loading"
+              outlined
+              dense
+              maxlength="80"
               :rules="[
                 (value) => !!value || 'Informe seu nome.',
                 (value) =>
-                  value.length >= 2 ||
-                  'O nome deve ter pelo menos 2 caracteres.',
+                  value.length >= 2 || 'Informe ao menos 2 caracteres.',
               ]"
-            />
+            >
+              <template #prepend>
+                <q-icon name="mdi-account-outline" />
+              </template>
+            </q-input>
           </div>
 
           <div class="col-6">
             <q-input
-              v-model="lastName"
-              outlined
-              dense
+              v-model.trim="lastName"
               label="Sobrenome"
               autocomplete="family-name"
-              :disable="loading"
+              outlined
+              dense
+              maxlength="100"
               :rules="[
                 (value) => !!value || 'Informe seu sobrenome.',
                 (value) =>
-                  value.length >= 2 ||
-                  'O sobrenome deve ter pelo menos 2 caracteres.',
+                  value.length >= 2 || 'Informe ao menos 2 caracteres.',
               ]"
-            />
+            >
+              <template #prepend>
+                <q-icon name="mdi-account-outline" />
+              </template>
+            </q-input>
+          </div>
+        </div>
+
+        <div class="row q-col-gutter-sm">
+          <div class="col-6">
+            <q-input
+              v-model="cpf"
+              label="CPF"
+              mask="###.###.###-##"
+              outlined
+              dense
+              class="q-mb-md"
+              hint="Informe os 11 dígitos do CPF."
+              :rules="[
+                (value) =>
+                  !value ||
+                  value.replace(/\D/g, '').length === 11 ||
+                  'O CPF deve conter 11 dígitos.',
+                (value) => !!value || 'Informe seu CPF.',
+              ]"
+            >
+              <template #prepend>
+                <q-icon name="mdi-card-account-details-outline" />
+              </template>
+            </q-input>
+          </div>
+
+          <div class="col-6">
+            <q-input
+              v-model="phone"
+              label="Telefone"
+              type="tel"
+              mask="(##) #####-####"
+              autocomplete="tel"
+              outlined
+              dense
+              maxlength="20"
+              hint="Inclua o DDD."
+              class="q-mb-md"
+              :rules="[
+                (value) =>
+                  !value ||
+                  value.replace(/\D/g, '').length >= 10 ||
+                  'Informe um telefone válido.',
+                (value) => !!value || 'Informe seu telefone.',
+              ]"
+            >
+              <template #prepend>
+                <q-icon name="mdi-whatsapp" />
+              </template>
+            </q-input>
           </div>
         </div>
 
@@ -67,7 +124,7 @@
           label="E-mail"
           type="email"
           autocomplete="email"
-          class="q-mt-md"
+          class="q-mt-xs"
           :disable="loading"
           :rules="[
             (value) => !!value || 'Informe seu e-mail.',
@@ -86,7 +143,7 @@
           label="Senha"
           :type="showPassword ? 'text' : 'password'"
           autocomplete="new-password"
-          class="q-mt-md"
+          class="q-mt-xs"
           :disable="loading"
           :rules="[
             (value) => !!value || 'Informe sua senha.',
@@ -114,7 +171,7 @@
           label="Confirmar senha"
           :type="showConfirmPassword ? 'text' : 'password'"
           autocomplete="new-password"
-          class="q-mt-md"
+          class="q-mt-xs"
           :disable="loading"
           :rules="[
             (value) => !!value || 'Confirme sua senha.',
@@ -222,6 +279,8 @@ const authStore = useAuthStore()
 const firstName = ref('')
 const lastName = ref('')
 const email = ref('')
+const cpf = ref('')
+const phone = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const organizationName = ref('')
@@ -249,6 +308,8 @@ const handleRegister = async () => {
         firstName: firstName.value,
         lastName: lastName.value,
         email: email.value,
+        cpf: cpf.value,
+        phone: phone.value,
         password: password.value,
         organizationName: organizationName.value,
         ...(organizationSlug.value
@@ -288,7 +349,8 @@ const handleRegister = async () => {
 
     $q.notify({
       type: 'negative',
-      message: 'Não foi possível criar sua conta. Verifique os dados e tente novamente.',
+      message:
+        'Não foi possível criar sua conta. Verifique os dados e tente novamente.',
     })
   } finally {
     loading.value = false
