@@ -1109,7 +1109,6 @@ useHead({
   .business-dashboard .text-overline {
     font-size: 0.65rem;
   }
-
   .business-dashboard .text-h6 {
     font-size: 1rem;
   }
