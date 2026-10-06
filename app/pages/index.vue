@@ -560,12 +560,200 @@
         </div>
       </div>
     </section>
+
+    <section
+      id="planos"
+      class="plans-section q-px-md q-px-lg-xl"
+      aria-labelledby="plans-title"
+    >
+      <div class="plans-container wrapper">
+        <div class="text-center plans-heading">
+          <div class="text-overline text-primary text-weight-bold">
+            Para cada fase do seu negócio
+          </div>
+          <h2 id="plans-title" class="text-h4 text-weight-bold q-mt-sm q-mb-md">
+            Planos pensados para crescer com você
+          </h2>
+          <p class="text-body2 text-grey-7 q-mx-auto q-mb-none">
+            Estamos preparando opções flexíveis para organizar seus
+            agendamentos e levar sua operação mais longe.
+          </p>
+          <q-badge
+            color="deep-purple-1"
+            text-color="deep-purple-10"
+            class="q-mt-md q-px-md q-py-sm"
+          >
+            Planos e recursos previstos
+          </q-badge>
+        </div>
+
+        <q-carousel
+          v-if="isMobile"
+          v-model="activePlanSlide"
+          animated
+          swipeable
+          :autoplay="7000"
+          control-color="primary"
+          class="plans-carousel q-mt-lg"
+          aria-label="Planos disponíveis"
+        >
+          <q-carousel-slide
+            v-for="plan in subscriptionPlans"
+            :key="plan.name"
+            :name="plan.name"
+            class="q-pa-sm"
+            :aria-label="`Plano ${plan.name}`"
+          >
+            <q-card
+              flat
+              bordered
+              class="plan-card full-height"
+              :class="{ 'plan-card-featured': plan.featured }"
+            >
+              <q-card-section class="plan-card-heading">
+                <div class="row items-center justify-between">
+                  <div class="text-h5 text-weight-bold">
+                    {{ plan.name }}
+                  </div>
+                  <q-badge
+                    v-if="plan.featured"
+                    color="primary"
+                    text-color="white"
+                    class="q-px-sm q-py-xs"
+                  >
+                    Mais recursos
+                  </q-badge>
+                </div>
+                <div class="text-body2 text-grey-7 q-mt-sm">
+                  {{ plan.description }}
+                </div>
+              </q-card-section>
+
+              <q-separator />
+
+              <q-card-section class="q-gutter-md">
+                <div
+                  v-for="feature in plan.features"
+                  :key="feature.label"
+                  class="plan-feature row items-start no-wrap"
+                >
+                  <q-icon
+                    :name="feature.included ? 'mdi-check-circle' : 'mdi-minus-circle-outline'"
+                    :color="feature.included ? 'positive' : 'grey-5'"
+                    size="20px"
+                    class="q-mr-sm q-mt-xs"
+                    aria-hidden="true"
+                  />
+                  <span
+                    :class="feature.included ? 'text-grey-9' : 'text-grey-6'"
+                  >
+                    {{ feature.label }}
+                  </span>
+                </div>
+              </q-card-section>
+
+              <q-space />
+
+              <q-card-actions class="q-pa-md">
+                <q-btn
+                  outline
+                  rounded
+                  no-caps
+                  color="primary"
+                  class="full-width"
+                  label="Contratar plano"
+                  to="/auth/register"
+                  disable
+                />
+              </q-card-actions>
+            </q-card>
+          </q-carousel-slide>
+        </q-carousel>
+
+        <div v-else class="row q-col-gutter-lg q-mt-lg">
+          <div
+            v-for="plan in subscriptionPlans"
+            :key="plan.name"
+            class="col-12 col-md-4"
+          >
+            <q-card
+              flat
+              bordered
+              class="plan-card full-height"
+              :class="{ 'plan-card-featured': plan.featured }"
+            >
+              <q-card-section class="plan-card-heading">
+                <div class="row items-center justify-between">
+                  <div class="text-h5 text-weight-bold">
+                    {{ plan.name }}
+                  </div>
+                  <q-badge
+                    v-if="plan.featured"
+                    color="primary"
+                    text-color="white"
+                    class="q-px-sm q-py-xs"
+                  >
+                    Mais recursos
+                  </q-badge>
+                </div>
+                <div class="text-body2 text-grey-7 q-mt-sm">
+                  {{ plan.description }}
+                </div>
+              </q-card-section>
+
+              <q-separator />
+
+              <q-card-section class="q-gutter-md">
+                <div
+                  v-for="feature in plan.features"
+                  :key="feature.label"
+                  class="plan-feature row items-start no-wrap"
+                >
+                  <q-icon
+                    :name="feature.included ? 'mdi-check-circle' : 'mdi-minus-circle-outline'"
+                    :color="feature.included ? 'positive' : 'grey-5'"
+                    size="20px"
+                    class="q-mr-sm q-mt-xs"
+                    aria-hidden="true"
+                  />
+                  <span
+                    :class="feature.included ? 'text-grey-9' : 'text-grey-6'"
+                  >
+                    {{ feature.label }}
+                  </span>
+                </div>
+              </q-card-section>
+
+              <q-space />
+
+              <q-card-actions class="q-pa-md">
+                <q-btn
+                  outline
+                  rounded
+                  no-caps
+                  color="primary"
+                  class="full-width"
+                  label="Contratar plano"
+                  to="/auth/register"
+                  disable
+                />
+              </q-card-actions>
+            </q-card>
+          </div>
+        </div>
+        <p class="text-caption text-grey-7 text-center q-mt-lg q-mb-none">
+          Os recursos, limites e condições poderão ser ajustados até o
+          lançamento dos planos. Nenhuma cobrança é realizada nesta etapa.
+        </p>
+      </div>
+    </section>
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useQuasar } from 'quasar'
+import { useMobile } from '~/composables/useMobile'
 import { getErrorMessage } from '~/utils/global'
 
 definePageMeta({
@@ -574,17 +762,55 @@ definePageMeta({
 
 const publicStores = usePublicStores()
 const $q = useQuasar()
+const { isMobile } = useMobile()
 
 const activeAudienceSlide = ref('customers')
+const activePlanSlide = ref('Starter')
 const storeQuery = ref('')
 const loading = ref(false)
 const searchPerformed = ref(false)
+const subscriptionPlans = [
+  {
+    name: 'Starter R$39,90',
+    description: 'O essencial para começar a organizar seus atendimentos.',
+    featured: false,
+    features: [
+      { label: '1 loja', included: true },
+      { label: 'Agendamentos online', included: true },
+      { label: 'Importação de clientes por planilha', included: false },
+      { label: 'Pagamentos pela plataforma', included: false },
+    ],
+  },
+  {
+    name: 'Pro R$59,90',
+    description: 'Mais controle para empresas com uma operação em expansão.',
+    featured: false,
+    features: [
+      { label: 'Até 3 lojas', included: true },
+      { label: 'Agendamentos online', included: true },
+      { label: 'Importação de clientes por planilha', included: true },
+      { label: 'Exportação mensal de agendamentos', included: true },
+      { label: 'Pagamentos pela plataforma', included: false },
+    ],
+  },
+  {
+    name: 'Premium R$99,90',
+    description: 'Recursos completos para gerenciar toda a sua operação.',
+    featured: true,
+    features: [
+      { label: 'Lojas ilimitadas', included: true },
+      { label: 'Gestão completa de agendamentos', included: true },
+      { label: 'Importação e exportação de dados', included: true },
+      { label: 'Pagamentos pela plataforma: Pix, débito e crédito', included: true },
+    ],
+  },
+]
 
 const stores = ref<
   Awaited<ReturnType<typeof publicStores.search>>
 >([])
 
-const ogImage = ref('/favicon.png')
+const ogImage = ref('/logo.png')
 
 function storePage(slug: string) {
   return `/public/stores/${encodeURIComponent(slug)}/home`
@@ -653,11 +879,11 @@ useHead({
     },
     {
       property: 'og:width',
-      content: '1200',
+      content: '300',
     },
     {
       property: 'og:height',
-      content: '630',
+      content: '300',
     },
   ],
 })
@@ -921,6 +1147,50 @@ useHead({
 
 .found-store-card {
   border-radius: 14px;
+}
+
+/* PLANOS */
+
+.plans-section {
+  padding-top: 24px;
+  padding-bottom: 64px;
+}
+
+.plans-container {
+  max-width: 1120px;
+}
+
+.plans-heading > p {
+  max-width: 680px;
+  line-height: 1.6;
+}
+
+.plans-carousel {
+  height: 500px;
+  border-radius: 18px;
+}
+
+.plan-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 18px;
+  border-color: #e9e4f1;
+  background: #fff;
+}
+
+.plan-card-featured {
+  border: 2px solid var(--q-primary);
+  box-shadow: 0 14px 34px rgb(100 42 251 / 12%);
+}
+
+.plan-card-heading {
+  min-height: 128px;
+  padding: 24px;
+}
+
+.plan-feature {
+  line-height: 1.5;
 }
 
 /* TABLET */
