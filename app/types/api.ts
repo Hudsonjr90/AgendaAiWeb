@@ -14,6 +14,49 @@ export interface LoginOrganization {
 }
 
 export type OrganizationRole = 'OWNER' | 'ADMIN' | 'MANAGER' | 'STAFF'
+export type PlanCode = 'STARTER' | 'PRO' | 'PREMIUM'
+export type BillingCycle = 'MONTHLY' | 'YEARLY'
+export type PlanLimitResource = 'STORES' | 'PROFESSIONALS' | 'SERVICES'
+
+export interface BillingPlan {
+  code: PlanCode
+  name: string
+  description: string | null
+  prices: {
+    billingCycle: BillingCycle
+    amountCents: number
+    currency: 'BRL'
+  }[]
+  limits: {
+    resource: PlanLimitResource
+    maxQuantity: number | null
+  }[]
+}
+
+export interface BillingSubscription {
+  status: 'PENDING_PAYMENT' | 'ACTIVE' | 'PAST_DUE' | 'CANCELED' | 'EXPIRED'
+  billingCycle: BillingCycle
+  checkoutUrl: string | null
+  currentPeriodStart: string | null
+  currentPeriodEnd: string | null
+  cancelAtPeriodEnd: boolean
+  canceledAt: string | null
+  plan: BillingPlan
+  payments: {
+    status: string
+    amountCents: number
+    currency: 'BRL'
+    dueDate: string | null
+    paidAt: string | null
+    invoiceUrl: string | null
+    createdAt: string
+  }[]
+}
+
+export interface BillingCheckoutResponse {
+  subscriptionId: string
+  checkoutUrl: string
+}
 
 export interface LoginResponse {
   accessToken: string

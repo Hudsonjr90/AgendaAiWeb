@@ -85,7 +85,7 @@
                   <q-chip
                     color="white"
                     text-color="dark"
-                    icon="mdi-content-cut"
+                    icon="mdi-clipboard-search-outline"
                   >
                     Consulte serviços
                   </q-chip>
@@ -394,7 +394,7 @@
                   rounded
                   clearable
                   maxlength="100"
-                  label="Nome da loja"
+                  label="Nome da loja ou estabelecimento"
                   placeholder="Ex.: Barbearia Central"
                   hint="Também é possível pesquisar pelo identificador público."
                   :disable="loading"
@@ -575,20 +575,44 @@
             Planos pensados para crescer com você
           </h2>
           <p class="text-body2 text-grey-7 q-mx-auto q-mb-none">
-            Estamos preparando opções flexíveis para organizar seus
-            agendamentos e levar sua operação mais longe.
+            Escolha o plano e o ciclo de cobrança para contratar pelo checkout
+            seguro do Asaas.
           </p>
           <q-badge
-            color="deep-purple-1"
-            text-color="deep-purple-10"
+            color="green-1"
+            text-color="green-10"
             class="q-mt-md q-px-md q-py-sm"
           >
-            Planos e recursos previstos
+            Pix ou cartão de crédito
           </q-badge>
+          <div class="q-mt-lg">
+            <q-btn-toggle
+              v-model="selectedBillingCycle"
+              rounded
+              unelevated
+              toggle-color="primary"
+              no-caps
+              :options="[
+                { label: 'Mensal', value: 'MONTHLY' },
+                { label: 'Anual', value: 'YEARLY' },
+              ]"
+              aria-label="Ciclo de cobrança"
+            />
+          </div>
+        </div>
+        <div v-if="planLoadError" class="text-center q-mt-lg">
+          <q-btn
+            outline
+            rounded
+            no-caps
+            color="primary"
+            label="Tentar carregar planos"
+            @click="loadPlanCatalog"
+          />
         </div>
 
         <q-carousel
-          v-if="isMobile"
+          v-if="isMobile && !planLoadError"
           v-model="activePlanSlide"
           animated
           swipeable
@@ -599,8 +623,8 @@
         >
           <q-carousel-slide
             v-for="plan in subscriptionPlans"
-            :key="plan.name"
-            :name="plan.name"
+            :key="plan.code"
+            :name="plan.code"
             class="q-pa-sm"
             :aria-label="`Plano ${plan.name}`"
           >
@@ -627,6 +651,12 @@
                 <div class="text-body2 text-grey-7 q-mt-sm">
                   {{ plan.description }}
                 </div>
+                <div class="text-h5 text-primary text-weight-bold q-mt-md">
+                  {{ plan.priceLabel }}
+                  <span class="text-body2 text-grey-7 text-weight-regular">
+                    / {{ selectedBillingCycle === 'MONTHLY' ? 'mês' : 'ano' }}
+                  </span>
+                </div>
               </q-card-section>
 
               <q-separator />
@@ -662,18 +692,24 @@
                   color="primary"
                   class="full-width"
                   label="Contratar plano"
-                  to="/auth/register"
-                  disable
+                  :to="{
+                    path: '/auth/register',
+                    query: {
+                      plan: plan.code,
+                      billingCycle: selectedBillingCycle,
+                    },
+                  }"
+                  :disable="!plan.amountCents"
                 />
               </q-card-actions>
             </q-card>
           </q-carousel-slide>
         </q-carousel>
 
-        <div v-else class="row q-col-gutter-lg q-mt-lg">
+        <div v-else-if="!planLoadError" class="row q-col-gutter-lg q-mt-lg">
           <div
             v-for="plan in subscriptionPlans"
-            :key="plan.name"
+            :key="plan.code"
             class="col-12 col-md-4"
           >
             <q-card
@@ -699,6 +735,12 @@
                 <div class="text-body2 text-grey-7 q-mt-sm">
                   {{ plan.description }}
                 </div>
+                <div class="text-h5 text-primary text-weight-bold q-mt-md">
+                  {{ plan.priceLabel }}
+                  <span class="text-body2 text-grey-7 text-weight-regular">
+                    / {{ selectedBillingCycle === 'MONTHLY' ? 'mês' : 'ano' }}
+                  </span>
+                </div>
               </q-card-section>
 
               <q-separator />
@@ -734,16 +776,22 @@
                   color="primary"
                   class="full-width"
                   label="Contratar plano"
-                  to="/auth/register"
-                  disable
+                  :to="{
+                    path: '/auth/register',
+                    query: {
+                      plan: plan.code,
+                      billingCycle: selectedBillingCycle,
+                    },
+                  }"
+                  :disable="!plan.amountCents"
                 />
               </q-card-actions>
             </q-card>
           </div>
         </div>
         <p class="text-caption text-grey-7 text-center q-mt-lg q-mb-none">
-          Os recursos, limites e condições poderão ser ajustados até o
-          lançamento dos planos. Nenhuma cobrança é realizada nesta etapa.
+          O checkout é processado pelo Asaas. O acesso é liberado após a
+          confirmação do pagamento.
         </p>
       </div>
     </section>
@@ -751,66 +799,150 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { useMobile } from '~/composables/useMobile'
 import { getErrorMessage } from '~/utils/global'
+import type {
+  BillingCycle,
+  BillingPlan,
+  PlanCode,
+  PlanLimitResource,
+} from '~/types/api'
 
 definePageMeta({
   layout: 'main-layout',
 })
 
 const publicStores = usePublicStores()
+const api = useApi()
 const $q = useQuasar()
 const { isMobile } = useMobile()
 
 const activeAudienceSlide = ref('customers')
-const activePlanSlide = ref('Starter')
+const activePlanSlide = ref('STARTER')
 const storeQuery = ref('')
 const loading = ref(false)
 const searchPerformed = ref(false)
-const subscriptionPlans = [
+const selectedBillingCycle = ref<BillingCycle>('MONTHLY')
+const planCatalog = ref<BillingPlan[]>([])
+const planLoadError = ref(false)
+const plansLoading = ref(true)
+const marketingPlans: {
+  code: PlanCode
+  name: string
+  description: string
+  featured: boolean
+  features: { label: string; included: boolean }[]
+}[] = [
   {
-    name: 'Starter R$39,90',
+    code: 'STARTER',
+    name: 'Starter',
     description: 'O essencial para começar a organizar seus atendimentos.',
     featured: false,
     features: [
-      { label: '1 loja', included: true },
       { label: 'Agendamentos online', included: true },
       { label: 'Importação de clientes por planilha', included: false },
-      { label: 'Pagamentos pela plataforma', included: false },
+      { label: 'Pagamentos de agendamentos pela plataforma', included: false },
     ],
   },
   {
-    name: 'Pro R$59,90',
+    code: 'PRO',
+    name: 'Pro',
     description: 'Mais controle para empresas com uma operação em expansão.',
     featured: false,
     features: [
-      { label: 'Até 3 lojas', included: true },
       { label: 'Agendamentos online', included: true },
       { label: 'Importação de clientes por planilha', included: true },
       { label: 'Exportação mensal de agendamentos', included: true },
-      { label: 'Pagamentos pela plataforma', included: false },
+      { label: 'Pagamentos de agendamentos pela plataforma', included: false },
     ],
   },
   {
-    name: 'Premium R$99,90',
+    code: 'PREMIUM',
+    name: 'Premium',
     description: 'Recursos completos para gerenciar toda a sua operação.',
     featured: true,
     features: [
-      { label: 'Lojas ilimitadas', included: true },
       { label: 'Gestão completa de agendamentos', included: true },
       { label: 'Importação e exportação de dados', included: true },
-      { label: 'Pagamentos pela plataforma: Pix, débito e crédito', included: true },
+      {
+        label: 'Pagamentos de agendamentos pela plataforma (em breve)',
+        included: false,
+      },
     ],
   },
 ]
+const limitLabels: Record<
+  PlanLimitResource,
+  { plural: string; unlimited: string }
+> = {
+  STORES: { plural: 'lojas', unlimited: 'Lojas ilimitadas' },
+  PROFESSIONALS: {
+    plural: 'profissionais',
+    unlimited: 'Profissionais ilimitados',
+  },
+  SERVICES: { plural: 'serviços', unlimited: 'Serviços ilimitados' },
+}
+const subscriptionPlans = computed(() =>
+  marketingPlans.map((plan) => {
+    const catalogPlan = planCatalog.value.find(
+      (entry) => entry.code === plan.code,
+    )
+    const price = catalogPlan?.prices.find(
+      (entry) => entry.billingCycle === selectedBillingCycle.value,
+    )
+
+    return {
+      ...plan,
+      features: [
+        ...(catalogPlan?.limits.map((limit) => ({
+          label:
+            limit.maxQuantity === null
+              ? limitLabels[limit.resource].unlimited
+              : `Até ${limit.maxQuantity} ${limitLabels[limit.resource].plural}`,
+          included: true,
+        })) ?? []),
+        ...plan.features,
+      ],
+      amountCents: price?.amountCents,
+      priceLabel: plansLoading.value
+        ? 'Carregando...'
+        : price === undefined
+          ? 'Preço indisponível'
+          : new Intl.NumberFormat('pt-BR', {
+              style: 'currency',
+              currency: price.currency,
+            }).format(price.amountCents / 100),
+    }
+  }),
+)
+
+async function loadPlanCatalog() {
+  planLoadError.value = false
+  plansLoading.value = true
+  try {
+    planCatalog.value = await api<BillingPlan[]>('/billing/plans')
+  } catch (error) {
+    planLoadError.value = true
+    $q.notify({
+      type: 'negative',
+      message: getErrorMessage(error, 'Não foi possível carregar os planos.'),
+    })
+  } finally {
+    plansLoading.value = false
+  }
+}
 
 const stores = ref<
   Awaited<ReturnType<typeof publicStores.search>>
 >([])
 
 const ogImage = ref('/logo.png')
+
+onMounted(() => {
+  void loadPlanCatalog()
+})
 
 function storePage(slug: string) {
   return `/public/stores/${encodeURIComponent(slug)}/home`

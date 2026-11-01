@@ -21,6 +21,26 @@
     </q-card-section>
 
     <q-card-section class="q-pt-none">
+      <q-card flat class="bg-blue-1 q-mb-md">
+        <q-card-section class="row items-center justify-between q-py-sm">
+          <div>
+            <div class="text-caption text-grey-8">Plano para contratação</div>
+            <div class="text-subtitle2 text-weight-bold">
+              {{ selectedPlanName }} ·
+              {{ billingCycle === 'MONTHLY' ? 'mensal' : 'anual' }}
+            </div>
+          </div>
+          <q-btn
+            flat
+            dense
+            no-caps
+            color="primary"
+            label="Trocar"
+            to="/#planos"
+          />
+        </q-card-section>
+      </q-card>
+
       <q-form class="full-width" @submit.prevent="handleRegister">
         <div class="text-subtitle2 text-weight-medium q-mb-md">Seus dados</div>
 
@@ -265,7 +285,13 @@
 
 <script setup lang="ts">
 import { useQuasar } from 'quasar'
-import type { LoginResponse, RegisterResponse } from '~/types/api'
+import type {
+  BillingCheckoutResponse,
+  BillingCycle,
+  LoginResponse,
+  PlanCode,
+  RegisterResponse,
+} from '~/types/api'
 
 definePageMeta({
   layout: 'auth',
@@ -275,6 +301,25 @@ const router = useRouter()
 const api = useApi()
 const $q = useQuasar()
 const authStore = useAuthStore()
+const route = useRoute()
+
+const availablePlans: Record<PlanCode, string> = {
+  STARTER: 'Starter',
+  PRO: 'Pro',
+  PREMIUM: 'Premium',
+}
+const planCodes: PlanCode[] = ['STARTER', 'PRO', 'PREMIUM']
+const requestedPlan =
+  typeof route.query.plan === 'string'
+    ? planCodes.find((code) => code === route.query.plan)
+    : undefined
+const selectedPlanCode = ref<PlanCode>(requestedPlan ?? 'STARTER')
+const billingCycle = ref<BillingCycle>(
+  route.query.billingCycle === 'YEARLY' ? 'YEARLY' : 'MONTHLY',
+)
+const selectedPlanName = computed(
+  () => availablePlans[selectedPlanCode.value],
+)
 
 const firstName = ref('')
 const lastName = ref('')
@@ -320,21 +365,15 @@ const handleRegister = async () => {
       },
     })
 
+    let loginResponse: LoginResponse
     try {
-      const loginResponse = await api<LoginResponse>('/auth/login', {
+      loginResponse = await api<LoginResponse>('/auth/login', {
         method: 'POST',
         body: {
           email: email.value,
           password: password.value,
         },
       })
-
-      authStore.setSession(loginResponse)
-      $q.notify({
-        type: 'positive',
-        message: 'Conta criada. Vamos preparar sua organização.',
-      })
-      await router.push('/admin/onboarding')
     } catch (error) {
       console.error(error)
       $q.notify({
@@ -343,6 +382,38 @@ const handleRegister = async () => {
           'Sua conta foi criada, mas não foi possível iniciar a sessão. Entre para continuar a configuração.',
       })
       await router.push('/auth/login')
+      return
+    }
+
+    authStore.setSession(loginResponse)
+
+    try {
+      const checkout = await api<BillingCheckoutResponse>(
+        '/billing/checkout',
+        {
+          method: 'POST',
+          body: {
+            planCode: selectedPlanCode.value,
+            billingCycle: billingCycle.value,
+          },
+        },
+      )
+
+      window.location.assign(checkout.checkoutUrl)
+    } catch (error) {
+      console.error(error)
+      $q.notify({
+        type: 'negative',
+        message:
+          'Sua conta foi criada, mas não foi possível iniciar o checkout. Você poderá tentar novamente na área de assinatura.',
+      })
+      await router.push({
+        path: '/admin/billing/checkout',
+        query: {
+          plan: selectedPlanCode.value,
+          billingCycle: billingCycle.value,
+        },
+      })
     }
   } catch (error) {
     console.error(error)

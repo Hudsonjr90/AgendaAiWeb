@@ -189,6 +189,11 @@ const menuItems = computed(() => [
   ...(authStore.role === 'OWNER' || authStore.role === 'ADMIN'
     ? [
         {
+          label: 'Assinatura',
+          icon: 'mdi-credit-card-outline',
+          to: '/admin/billing/checkout',
+        },
+        {
           label: 'Configuração inicial',
           icon: 'mdi-clipboard-check-outline',
           to: '/admin/onboarding',
