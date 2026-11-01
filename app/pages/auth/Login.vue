@@ -106,7 +106,8 @@
 
 <script setup lang="ts">
 import { useQuasar } from 'quasar'
-import type { LoginResponse } from '~/types/api'
+import type { BillingSubscription, LoginResponse } from '~/types/api'
+import { getErrorMessage } from '~/utils/global'
 
 definePageMeta({
   layout: 'auth',
@@ -146,6 +147,15 @@ const handleLogin = async () => {
 
     authStore.setSession(response)
 
+    if (response.role === 'OWNER') {
+      const subscription =
+        await api<BillingSubscription | null>('/billing/subscription')
+      if (!subscription || subscription.status !== 'ACTIVE') {
+        await router.push('/admin/billing/checkout')
+        return
+      }
+    }
+
     if (response.role === 'OWNER' || response.role === 'ADMIN') {
       await organizationSetup.fetchProgress()
 
@@ -166,7 +176,10 @@ const handleLogin = async () => {
     console.error(error)
     $q.notify({
       type: 'negative',
-      message: 'E-mail ou senha inválidos.',
+      message: getErrorMessage(
+        error,
+        'Não foi possível entrar na conta. Verifique os dados e tente novamente.',
+      ),
     })
   } finally {
     loading.value = false

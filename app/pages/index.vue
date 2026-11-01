@@ -85,7 +85,7 @@
                   <q-chip
                     color="white"
                     text-color="dark"
-                    icon="mdi-content-cut"
+                    icon="mdi-clipboard-search-outline"
                   >
                     Consulte serviços
                   </q-chip>
@@ -394,7 +394,7 @@
                   rounded
                   clearable
                   maxlength="100"
-                  label="Nome da loja"
+                  label="Nome da loja ou estabelecimento"
                   placeholder="Ex.: Barbearia Central"
                   hint="Também é possível pesquisar pelo identificador público."
                   :disable="loading"
@@ -560,31 +560,389 @@
         </div>
       </div>
     </section>
+
+    <section
+      id="planos"
+      class="plans-section q-px-md q-px-lg-xl"
+      aria-labelledby="plans-title"
+    >
+      <div class="plans-container wrapper">
+        <div class="text-center plans-heading">
+          <div class="text-overline text-primary text-weight-bold">
+            Para cada fase do seu negócio
+          </div>
+          <h2 id="plans-title" class="text-h4 text-weight-bold q-mt-sm q-mb-md">
+            Planos pensados para crescer com você
+          </h2>
+          <p class="text-body2 text-grey-7 q-mx-auto q-mb-none">
+            Escolha o plano e o ciclo de cobrança para contratar pelo checkout
+            seguro do Asaas.
+          </p>
+          <q-badge
+            color="green-1"
+            text-color="green-10"
+            class="q-mt-md q-px-md q-py-sm"
+          >
+            Pix ou cartão de crédito
+          </q-badge>
+          <div class="q-mt-lg">
+            <q-btn-toggle
+              v-model="selectedBillingCycle"
+              rounded
+              unelevated
+              toggle-color="primary"
+              no-caps
+              :options="[
+                { label: 'Mensal', value: 'MONTHLY' },
+                { label: 'Anual', value: 'YEARLY' },
+              ]"
+              aria-label="Ciclo de cobrança"
+            />
+          </div>
+        </div>
+        <div v-if="planLoadError" class="text-center q-mt-lg">
+          <q-btn
+            outline
+            rounded
+            no-caps
+            color="primary"
+            label="Tentar carregar planos"
+            @click="loadPlanCatalog"
+          />
+        </div>
+
+        <q-carousel
+          v-if="isMobile && !planLoadError"
+          v-model="activePlanSlide"
+          animated
+          swipeable
+          :autoplay="7000"
+          control-color="primary"
+          class="plans-carousel q-mt-lg"
+          aria-label="Planos disponíveis"
+        >
+          <q-carousel-slide
+            v-for="plan in subscriptionPlans"
+            :key="plan.code"
+            :name="plan.code"
+            class="q-pa-sm"
+            :aria-label="`Plano ${plan.name}`"
+          >
+            <q-card
+              flat
+              bordered
+              class="plan-card full-height"
+              :class="{ 'plan-card-featured': plan.featured }"
+            >
+              <q-card-section class="plan-card-heading">
+                <div class="row items-center justify-between">
+                  <div class="text-h5 text-weight-bold">
+                    {{ plan.name }}
+                  </div>
+                  <q-badge
+                    v-if="plan.featured"
+                    color="primary"
+                    text-color="white"
+                    class="q-px-sm q-py-xs"
+                  >
+                    Mais recursos
+                  </q-badge>
+                </div>
+                <div class="text-body2 text-grey-7 q-mt-sm">
+                  {{ plan.description }}
+                </div>
+                <div class="text-h5 text-primary text-weight-bold q-mt-md">
+                  {{ plan.priceLabel }}
+                  <span class="text-body2 text-grey-7 text-weight-regular">
+                    / {{ selectedBillingCycle === 'MONTHLY' ? 'mês' : 'ano' }}
+                  </span>
+                </div>
+              </q-card-section>
+
+              <q-separator />
+
+              <q-card-section class="q-gutter-md">
+                <div
+                  v-for="feature in plan.features"
+                  :key="feature.label"
+                  class="plan-feature row items-start no-wrap"
+                >
+                  <q-icon
+                    :name="feature.included ? 'mdi-check-circle' : 'mdi-minus-circle-outline'"
+                    :color="feature.included ? 'positive' : 'grey-5'"
+                    size="20px"
+                    class="q-mr-sm q-mt-xs"
+                    aria-hidden="true"
+                  />
+                  <span
+                    :class="feature.included ? 'text-grey-9' : 'text-grey-6'"
+                  >
+                    {{ feature.label }}
+                  </span>
+                </div>
+              </q-card-section>
+
+              <q-space />
+
+              <q-card-actions class="q-pa-md">
+                <q-btn
+                  outline
+                  rounded
+                  no-caps
+                  color="primary"
+                  class="full-width"
+                  label="Contratar plano"
+                  :to="{
+                    path: '/auth/register',
+                    query: {
+                      plan: plan.code,
+                      billingCycle: selectedBillingCycle,
+                    },
+                  }"
+                  :disable="!plan.amountCents"
+                />
+              </q-card-actions>
+            </q-card>
+          </q-carousel-slide>
+        </q-carousel>
+
+        <div v-else-if="!planLoadError" class="row q-col-gutter-lg q-mt-lg">
+          <div
+            v-for="plan in subscriptionPlans"
+            :key="plan.code"
+            class="col-12 col-md-4"
+          >
+            <q-card
+              flat
+              bordered
+              class="plan-card full-height"
+              :class="{ 'plan-card-featured': plan.featured }"
+            >
+              <q-card-section class="plan-card-heading">
+                <div class="row items-center justify-between">
+                  <div class="text-h5 text-weight-bold">
+                    {{ plan.name }}
+                  </div>
+                  <q-badge
+                    v-if="plan.featured"
+                    color="primary"
+                    text-color="white"
+                    class="q-px-sm q-py-xs"
+                  >
+                    Mais recursos
+                  </q-badge>
+                </div>
+                <div class="text-body2 text-grey-7 q-mt-sm">
+                  {{ plan.description }}
+                </div>
+                <div class="text-h5 text-primary text-weight-bold q-mt-md">
+                  {{ plan.priceLabel }}
+                  <span class="text-body2 text-grey-7 text-weight-regular">
+                    / {{ selectedBillingCycle === 'MONTHLY' ? 'mês' : 'ano' }}
+                  </span>
+                </div>
+              </q-card-section>
+
+              <q-separator />
+
+              <q-card-section class="q-gutter-md">
+                <div
+                  v-for="feature in plan.features"
+                  :key="feature.label"
+                  class="plan-feature row items-start no-wrap"
+                >
+                  <q-icon
+                    :name="feature.included ? 'mdi-check-circle' : 'mdi-minus-circle-outline'"
+                    :color="feature.included ? 'positive' : 'grey-5'"
+                    size="20px"
+                    class="q-mr-sm q-mt-xs"
+                    aria-hidden="true"
+                  />
+                  <span
+                    :class="feature.included ? 'text-grey-9' : 'text-grey-6'"
+                  >
+                    {{ feature.label }}
+                  </span>
+                </div>
+              </q-card-section>
+
+              <q-space />
+
+              <q-card-actions class="q-pa-md">
+                <q-btn
+                  outline
+                  rounded
+                  no-caps
+                  color="primary"
+                  class="full-width"
+                  label="Contratar plano"
+                  :to="{
+                    path: '/auth/register',
+                    query: {
+                      plan: plan.code,
+                      billingCycle: selectedBillingCycle,
+                    },
+                  }"
+                  :disable="!plan.amountCents"
+                />
+              </q-card-actions>
+            </q-card>
+          </div>
+        </div>
+        <p class="text-caption text-grey-7 text-center q-mt-lg q-mb-none">
+          O checkout é processado pelo Asaas. O acesso é liberado após a
+          confirmação do pagamento.
+        </p>
+      </div>
+    </section>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
+import { useMobile } from '~/composables/useMobile'
 import { getErrorMessage } from '~/utils/global'
+import type {
+  BillingCycle,
+  BillingPlan,
+  PlanCode,
+  PlanLimitResource,
+} from '~/types/api'
 
 definePageMeta({
   layout: 'main-layout',
 })
 
 const publicStores = usePublicStores()
+const api = useApi()
 const $q = useQuasar()
+const { isMobile } = useMobile()
 
 const activeAudienceSlide = ref('customers')
+const activePlanSlide = ref('STARTER')
 const storeQuery = ref('')
 const loading = ref(false)
 const searchPerformed = ref(false)
+const selectedBillingCycle = ref<BillingCycle>('MONTHLY')
+const planCatalog = ref<BillingPlan[]>([])
+const planLoadError = ref(false)
+const plansLoading = ref(true)
+const marketingPlans: {
+  code: PlanCode
+  name: string
+  description: string
+  featured: boolean
+  features: { label: string; included: boolean }[]
+}[] = [
+  {
+    code: 'STARTER',
+    name: 'Starter',
+    description: 'O essencial para começar a organizar seus atendimentos.',
+    featured: false,
+    features: [
+      { label: 'Agendamentos online', included: true },
+      { label: 'Importação de clientes por planilha', included: false },
+      { label: 'Pagamentos de agendamentos pela plataforma', included: false },
+    ],
+  },
+  {
+    code: 'PRO',
+    name: 'Pro',
+    description: 'Mais controle para empresas com uma operação em expansão.',
+    featured: false,
+    features: [
+      { label: 'Agendamentos online', included: true },
+      { label: 'Importação de clientes por planilha', included: true },
+      { label: 'Exportação mensal de agendamentos', included: true },
+      { label: 'Pagamentos de agendamentos pela plataforma', included: false },
+    ],
+  },
+  {
+    code: 'PREMIUM',
+    name: 'Premium',
+    description: 'Recursos completos para gerenciar toda a sua operação.',
+    featured: true,
+    features: [
+      { label: 'Gestão completa de agendamentos', included: true },
+      { label: 'Importação e exportação de dados', included: true },
+      {
+        label: 'Pagamentos de agendamentos pela plataforma (em breve)',
+        included: false,
+      },
+    ],
+  },
+]
+const limitLabels: Record<
+  PlanLimitResource,
+  { plural: string; unlimited: string }
+> = {
+  STORES: { plural: 'lojas', unlimited: 'Lojas ilimitadas' },
+  PROFESSIONALS: {
+    plural: 'profissionais',
+    unlimited: 'Profissionais ilimitados',
+  },
+  SERVICES: { plural: 'serviços', unlimited: 'Serviços ilimitados' },
+}
+const subscriptionPlans = computed(() =>
+  marketingPlans.map((plan) => {
+    const catalogPlan = planCatalog.value.find(
+      (entry) => entry.code === plan.code,
+    )
+    const price = catalogPlan?.prices.find(
+      (entry) => entry.billingCycle === selectedBillingCycle.value,
+    )
+
+    return {
+      ...plan,
+      features: [
+        ...(catalogPlan?.limits.map((limit) => ({
+          label:
+            limit.maxQuantity === null
+              ? limitLabels[limit.resource].unlimited
+              : `Até ${limit.maxQuantity} ${limitLabels[limit.resource].plural}`,
+          included: true,
+        })) ?? []),
+        ...plan.features,
+      ],
+      amountCents: price?.amountCents,
+      priceLabel: plansLoading.value
+        ? 'Carregando...'
+        : price === undefined
+          ? 'Preço indisponível'
+          : new Intl.NumberFormat('pt-BR', {
+              style: 'currency',
+              currency: price.currency,
+            }).format(price.amountCents / 100),
+    }
+  }),
+)
+
+async function loadPlanCatalog() {
+  planLoadError.value = false
+  plansLoading.value = true
+  try {
+    planCatalog.value = await api<BillingPlan[]>('/billing/plans')
+  } catch (error) {
+    planLoadError.value = true
+    $q.notify({
+      type: 'negative',
+      message: getErrorMessage(error, 'Não foi possível carregar os planos.'),
+    })
+  } finally {
+    plansLoading.value = false
+  }
+}
 
 const stores = ref<
   Awaited<ReturnType<typeof publicStores.search>>
 >([])
 
-const ogImage = ref('/favicon.png')
+const ogImage = ref('/logo.png')
+
+onMounted(() => {
+  void loadPlanCatalog()
+})
 
 function storePage(slug: string) {
   return `/public/stores/${encodeURIComponent(slug)}/home`
@@ -653,11 +1011,11 @@ useHead({
     },
     {
       property: 'og:width',
-      content: '1200',
+      content: '300',
     },
     {
       property: 'og:height',
-      content: '630',
+      content: '300',
     },
   ],
 })
@@ -921,6 +1279,50 @@ useHead({
 
 .found-store-card {
   border-radius: 14px;
+}
+
+/* PLANOS */
+
+.plans-section {
+  padding-top: 24px;
+  padding-bottom: 64px;
+}
+
+.plans-container {
+  max-width: 1120px;
+}
+
+.plans-heading > p {
+  max-width: 680px;
+  line-height: 1.6;
+}
+
+.plans-carousel {
+  height: 500px;
+  border-radius: 18px;
+}
+
+.plan-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 18px;
+  border-color: #e9e4f1;
+  background: #fff;
+}
+
+.plan-card-featured {
+  border: 2px solid var(--q-primary);
+  box-shadow: 0 14px 34px rgb(100 42 251 / 12%);
+}
+
+.plan-card-heading {
+  min-height: 128px;
+  padding: 24px;
+}
+
+.plan-feature {
+  line-height: 1.5;
 }
 
 /* TABLET */

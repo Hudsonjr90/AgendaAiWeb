@@ -39,12 +39,26 @@
             unelevated
             rounded
             no-caps
-            icon="mdi-store-search-outline"
-            label="Encontrar loja"
+            aria-label="Encontrar loja ou estabelecimento"
             href="/#buscar"
-            class="q-ml-sm bg-white text-primary"
-          />
+            class="q-ml-sm bg-white text-primary search-nav-btn"
+          >
+            <q-icon name="mdi-store-search-outline" />
+            <span class="search-nav-label">
+              Encontrar loja ou estabelecimento
+            </span>
+          </q-btn>
         </div>
+
+        <q-btn
+          class="lt-md"
+          flat
+          round
+          dense
+          icon="mdi-store-search-outline"
+          aria-label="Encontrar loja ou estabelecimento"
+          href="/#buscar"
+        />
 
         <q-btn
           class="lt-lg"
@@ -125,3 +139,23 @@
 const mobileMenuOpen = ref(false)
 </script>
 
+<style scoped>
+.search-nav-label {
+  max-width: 0;
+  margin-left: 0;
+  overflow: hidden;
+  opacity: 0;
+  white-space: nowrap;
+  transition:
+    max-width 220ms ease,
+    margin-left 220ms ease,
+    opacity 160ms ease;
+}
+
+.search-nav-btn:hover .search-nav-label,
+.search-nav-btn:focus-visible .search-nav-label {
+  max-width: 240px;
+  margin-left: 8px;
+  opacity: 1;
+}
+</style>
