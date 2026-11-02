@@ -225,7 +225,7 @@
                     size="md"
                     icon="mdi-domain"
                     label="Criar conta da empresa"
-                    to="/auth/register"
+                    href="#planos"
                   />
 
                   <q-btn
@@ -583,7 +583,7 @@
             text-color="green-10"
             class="q-mt-md q-px-md q-py-sm"
           >
-            Pix ou cartão de crédito
+            Cartão de crédito
           </q-badge>
           <div class="q-mt-lg">
             <q-btn-toggle
@@ -693,7 +693,7 @@
                   class="full-width"
                   label="Contratar plano"
                   :to="{
-                    path: '/auth/register',
+                    path: '/checkout/start',
                     query: {
                       plan: plan.code,
                       billingCycle: selectedBillingCycle,
@@ -777,7 +777,7 @@
                   class="full-width"
                   label="Contratar plano"
                   :to="{
-                    path: '/auth/register',
+                    path: '/checkout/start',
                     query: {
                       plan: plan.code,
                       billingCycle: selectedBillingCycle,

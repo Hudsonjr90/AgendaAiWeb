@@ -87,7 +87,7 @@
         color="secondary"
         label="Não tem uma conta? Crie a sua"
         icon-right="mdi-account-plus-outline"
-        to="/auth/register"
+        to="/#planos"
       />
 
       <q-btn
