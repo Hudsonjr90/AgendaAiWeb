@@ -120,6 +120,7 @@
           rounded
           unelevated
           toggle-color="primary"
+          no-caps
           :options="[
             { label: 'Mensal', value: 'MONTHLY' },
             { label: 'Anual', value: 'YEARLY' },
@@ -211,7 +212,7 @@
         />
       </div>
       <div class="text-caption text-grey-7 text-center q-mt-sm">
-        Meios disponíveis para assinatura: Pix e cartão de crédito.
+        Pagamento recorrente por cartão de crédito. Pix não está disponível para assinaturas.
       </div>
     </template>
   </q-page>
@@ -292,17 +293,19 @@ function resourceLabel(
   resource: PlanLimitResource,
   quantity: number | null,
 ) {
-  const labels: Record<PlanLimitResource, { plural: string; unlimited: string }> = {
-    STORES: { plural: 'lojas', unlimited: 'Lojas ilimitadas' },
+  const labels: Record<PlanLimitResource, { plural: string; singular: string; unlimited: string }> = {
+    STORES: { plural: 'lojas', singular: 'loja', unlimited: 'Lojas ilimitadas' },
     PROFESSIONALS: {
       plural: 'profissionais',
+      singular: 'profissional',
       unlimited: 'Profissionais ilimitados',
     },
-    SERVICES: { plural: 'serviços', unlimited: 'Serviços ilimitados' },
+    SERVICES: { plural: 'serviços', singular: 'serviço', unlimited: 'Serviços ilimitados' },
   }
-  return quantity === null
-    ? labels[resource].unlimited
-    : `Até ${quantity} ${labels[resource].plural}`
+
+  if (quantity === null) return labels[resource].unlimited
+  if (quantity === 1) return `Até 1 ${labels[resource].singular}`
+  return `Até ${quantity} ${labels[resource].plural}`
 }
 
 async function loadPlans() {

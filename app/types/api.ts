@@ -58,6 +58,22 @@ export interface BillingCheckoutResponse {
   checkoutUrl: string
 }
 
+export interface PublicBillingCheckoutResponse {
+  purchaseReference: string
+  checkoutUrl: string
+}
+
+export interface PublicPurchaseStatus {
+  status:
+    | 'PENDING_PAYMENT'
+    | 'PAID'
+    | 'REGISTERED'
+    | 'CANCELED'
+    | 'EXPIRED'
+    | 'FAILED'
+  registrationEmailSent: boolean
+}
+
 export interface LoginResponse {
   accessToken: string
   tokenType: string
