@@ -16,12 +16,13 @@
 
       <q-card-section>
         <q-card flat class="bg-blue-1 q-mb-lg">
-          <q-card-section class="row items-center justify-between q-py-sm">
+          <q-card-section class="row items-center justify-between q-px-md q-py-sm">
             <div>
-              <div class="text-caption text-grey-8">Plano escolhido</div>
+              <div class="text-caption text-grey-9">Plano escolhido</div>
               <div class="text-subtitle1 text-weight-bold">
                 {{ selectedPlanName }} ·
-                {{ billingCycle === 'MONTHLY' ? 'mensal' : 'anual' }} . {{}}
+                {{ billingCycle === 'MONTHLY' ? 'mensal' : 'anual' }} ·
+                {{ selectedPlanPrice }}
               </div>
             </div>
             <q-btn
@@ -104,39 +105,39 @@
                 ]"
               />
             </div>
+            <div class="col-12">
+              <q-input
+                v-model="email"
+                outlined
+                dense
+                label="E-mail"
+                type="email"
+                autocomplete="email"
+                class="full-width"
+                :disable="loading"
+                :rules="[
+                  (value) => !!value || 'Informe seu e-mail.',
+                  (value) =>
+                    /.+@.+\..+/.test(value) || 'Informe um e-mail válido.',
+                ]"
+              />
+              <q-banner rounded class="bg-grey-2 text-grey-8 q-mt-md">
+                O checkout recorrente é processado com segurança pelo Asaas e
+                aceita cartão de crédito.
+              </q-banner>
 
-            <q-input
-              v-model="email"
-              outlined
-              dense
-              label="E-mail"
-              type="email"
-              autocomplete="email"
-              class="full-width"
-              :disable="loading"
-              :rules="[
-                (value) => !!value || 'Informe seu e-mail.',
-                (value) =>
-                  /.+@.+\..+/.test(value) || 'Informe um e-mail válido.',
-              ]"
-            />
+              <q-btn
+                type="submit"
+                color="primary"
+                unelevated
+                no-caps
+                icon="mdi-lock-outline"
+                label="Continuar para pagamento"
+                class="full-width q-mt-md"
+                :loading="loading"
+              />
+            </div>
           </div>
-
-          <q-banner rounded class="bg-grey-2 text-grey-8 q-mt-md">
-            O checkout recorrente é processado com segurança pelo Asaas e aceita
-            cartão de crédito.
-          </q-banner>
-
-          <q-btn
-            type="submit"
-            color="primary"
-            unelevated
-            no-caps
-            icon="mdi-lock-outline"
-            label="Continuar para pagamento"
-            class="full-width q-mt-md"
-            :loading="loading"
-          />
         </q-form>
       </q-card-section>
     </q-card>
@@ -173,6 +174,14 @@ const planNames: Record<PlanCode, string> = {
   PREMIUM: 'Premium',
 }
 const selectedPlanName = computed(() => planNames[selectedPlanCode.value])
+const selectedPlanPrice = computed(() => {
+  const planPrices: Record<PlanCode, Record<BillingCycle, string>> = {
+    STARTER: { MONTHLY: 'R$ 39,90', YEARLY: 'R$ 399,00' },
+    PRO: { MONTHLY: 'R$ 59,90', YEARLY: 'R$ 599,00' },
+    PREMIUM: { MONTHLY: 'R$ 99,90', YEARLY: 'R$ 999,00' },
+  }
+  return planPrices[selectedPlanCode.value][billingCycle.value]
+})
 const firstName = ref('')
 const lastName = ref('')
 const email = ref('')
