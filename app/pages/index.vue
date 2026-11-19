@@ -616,7 +616,8 @@
           v-model="activePlanSlide"
           animated
           swipeable
-          :autoplay="7000"
+          infinite
+          :autoplay="5000"
           control-color="primary"
           class="plans-carousel q-mt-lg"
           aria-label="Planos disponíveis"
@@ -651,7 +652,7 @@
                 <div class="text-body2 text-grey-7 q-mt-sm">
                   {{ plan.description }}
                 </div>
-                <div class="text-h5 text-primary text-weight-bold q-mt-md">
+                <div class="text-h5 text-primary text-weight-bold q-mt-md q-mb-md">
                   {{ plan.priceLabel }}
                   <span class="text-body2 text-grey-7 text-weight-regular">
                     / {{ selectedBillingCycle === 'MONTHLY' ? 'mês' : 'ano' }}
@@ -661,7 +662,7 @@
 
               <q-separator />
 
-              <q-card-section class="q-gutter-md">
+              <q-card-section class="q-gutter-sm">
                 <div
                   v-for="feature in plan.features"
                   :key="feature.label"
@@ -682,9 +683,7 @@
                 </div>
               </q-card-section>
 
-              <q-space />
-
-              <q-card-actions class="q-pa-md">
+              <q-card-actions class="q-pa-xs q-px-md">
                 <q-btn
                   outline
                   rounded
@@ -854,7 +853,6 @@ const marketingPlans: {
     features: [
       { label: 'Agendamentos online', included: true },
       { label: 'Importação de clientes por planilha', included: true },
-      { label: 'Exportação mensal de agendamentos', included: true },
       { label: 'Pagamentos de agendamentos pela plataforma', included: false },
     ],
   },
@@ -867,7 +865,7 @@ const marketingPlans: {
       { label: 'Gestão completa de agendamentos', included: true },
       { label: 'Importação e exportação de dados', included: true },
       {
-        label: 'Pagamentos de agendamentos pela plataforma (em breve)',
+        label: 'Pagamentos de agendamentos pela plataforma',
         included: false,
       },
     ],
